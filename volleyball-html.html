@@ -716,8 +716,29 @@
     }
 
     function clearTournamentData() {
+        // Clear all data structures
+        activeTeams = [];
+        groups = Array(6).fill().map(() => []);
+        matches = [];
+        teamStats = {};
+        isFirstGeneration = true;
+        
+        // Clear localStorage
         localStorage.removeItem('volleyballTournament');
-        location.reload(); // Reload the page to reset all data
+        
+        // Update all displays
+        updateTeamsList();
+        updateGroupsDisplay();
+        updateMatchesDisplay();
+        updateStandings();
+        
+        // Reset team management section
+        document.getElementById('newTeamInput').value = '';
+        const teamManagementSection = document.getElementById('team-management-section');
+        if (!teamManagementSection.classList.contains('hidden')) {
+            teamManagementSection.classList.add('hidden');
+            document.getElementById('toggle-team-management').textContent = 'Show Team Management';
+        }
     }
 
     generateGroups();
