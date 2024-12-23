@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeachBros Volleyball Tournament</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .active-tab {
+            border-bottom: 2px solid blue;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto p-4 max-w-6xl">
+        <div class="bg-white rounded-lg shadow-sm">
+            <!-- Tabs -->
+            <div class="border-b">
+                <div class="flex gap-4 px-4">
+                    <button id="teams-button" class="tab-button active-tab" onclick="showTab('teams')">Teams & Groups</button>
+                    <button id="matches-button" class="tab-button" onclick="showTab('matches')">Matches</button>
+                    <button id="standings-button" class="tab-button" onclick="showTab('standings')">Standings</button>
+                </div>
+            </div>
+
+            <div id="teams-tab" class="tab-content active p-4">
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Beach Volleyball Tournament Groups</h2>
+                        <button 
+                            onclick="toggleTeamManagement()" 
+                            class="text-blue-500 hover:text-blue-700 px-4 py-2 rounded border border-blue-500 hover:border-blue-700"
+                            id="toggle-team-management"
+                        >
+                            Show Team Management
+                        </button>
+                    </div>
+
+                    <!-- Team Management Section (hidden by default) -->
+                    <div id="team-management-section" class="hidden space-y-4">
+                        <!-- Add Team Form -->
+                        <div id="team-management" class="p-4 border rounded-lg bg-gray-50">
+                            <h3 class="font-semibold mb-2">Add New Team</h3>
+                            <div class="flex gap-2">
+                                <input 
+                                    type="text" 
+                                    id="newTeamInput" 
+                                    placeholder="Enter team name" 
+                                    class="flex-1 px-3 py-2 border rounded"
+                                >
+                                <button 
+                                    onclick="addTeam()" 
+                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                >
+                                    Add Team
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Team List -->
+                        <div id="teams-list-container" class="p-4 border rounded-lg">
+                            <h3 class="font-semibold mb-2">Current Teams</h3>
+                            <div id="teams-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                <!-- Teams will be listed here -->
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="mb-4 space-y-2">
+                        <button id="generate-button" onclick="toggleTournament()" class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Generate Groups & Schedule
+                        </button>
+                        <button onclick="generateRandomScores()" class="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                            Generate Random Scores
+                        </button>
+                        <button onclick="reshuffleTeams()" class="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                            Reshuffle Teams
+                        </button>
+                    </div>
+                </div>
+
+                <div id="groups-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Groups will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Matches Tab -->
+            <div id="matches-tab" class="tab-content p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="matches-container">
+                    <!-- Matches will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Standings Tab -->
+            <div id="standings-tab" class="tab-content p-4">
+                <div class="space-y-6">
+                    <div class="bg-white rounded-lg p-4 border">
+                        <h3 class="text-lg font-semibold mb-4">Tournament Standings (Wins)</h3>
+                        <div id="wins-standings" class="space-y-2">
+                            <!-- Wins standings will be inserted here -->
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-4 border">
+                        <h3 class="text-lg font-semibold mb-4">Point Differential Rankings</h3>
+                        <div id="differential-standings" class="space-y-2">
+                            <!-- Point differential standings will be inserted here -->
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border">
+                        <h3 class="text-lg font-semibold mb-4">Group Rankings</h3>
+                        <div id="group-standings" class="space-y-6">
+                            <!-- Group standings will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default teams
+        const defaultTeams = [
+            "Spike Masters", "Beach Kings", "Sand Storm", "Wave Riders",
+            "Net Ninjas", "Coastal Crew", "Sun Setters", "Beach Blast",
+            "Sand Devils", "Ocean's 6", "Tidal Force", "Palm Beach",
+            "Sandy Aces", "Beach Breakers", "Surf Squad", "Volleyball Vic's",
+            "Sea Smashers", "Coast Guards", "Beach Bros", "Sand Stars",
+            "Wave Warriors", "Beach Legends", "Net Nobles", "Sand Sharks"
+        ];
+
+        let activeTeams = [];
+        let groups = Array(6).fill().map(() => []);
+        let matches = [];
+        let teamStats = {};
+        let isFirstGeneration = true;
+
+        // Initialize team stats
+        defaultTeams.forEach(team => {
+            teamStats[team] = {
+                wins: 0,
+                pointsScored: 0,
+                pointsConceded: 0,
+                differential: 0
+            };
+        });
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show the selected tab content
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            // Remove the active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active-tab');
+            });
+
+            // Add the active class to the selected tab button
+            document.getElementById(`${tabName}-button`).classList.add('active-tab');
+
+            // Update standings if the standings tab is selected
+            if (tabName === 'standings') {
+                updateStandings();
+            }
+        }
+
+        function toggleTeamManagement() {
+            const section = document.getElementById('team-management-section');
+            const button = document.getElementById('toggle-team-management');
+            const isHidden = section.classList.contains('hidden');
+            
+            if (isHidden) {
+                section.classList.remove('hidden');
+                button.textContent = 'Hide Team Management';
+            } else {
+                section.classList.add('hidden');
+                button.textContent = 'Show Team Management';
+            }
+        }
+
+        function generateGroups() {
+            // Shuffle teams and distribute into groups
+            const shuffledTeams = [...activeTeams].sort(() => Math.random() - 0.5);
+            groups = Array(6).fill().map(() => []);
+            shuffledTeams.forEach((team, index) => {
+                const groupIndex = index % 6;
+                groups[groupIndex].push(team);
+            });
+
+            // Generate matches
+            generateMatches();
+            
+            // Update UI
+            updateGroupsDisplay();
+            updateMatchesDisplay();
+            updateStandings();
+        }
+
+        function toggleTournament() {
+            isTournamentStarted = true;
+            if (isFirstGeneration) {
+                activeTeams = [...defaultTeams];
+                isFirstGeneration = false;
+            }
+
+            initializeTeamStats();
+            updateTeamsList();
+            generateGroups();
+        }
+
+        function addTeam() {
+            const input = document.getElementById('newTeamInput');
+            const teamName = input.value.trim();
+            
+            if (teamName && !activeTeams.includes(teamName)) {
+                activeTeams.push(teamName);
+                input.value = '';
+                updateTeamsList();
+                initializeTeamStats();
+                generateGroups();
+            }
+        }
+
+        function initializeTeamStats() {
+            teamStats = {};
+            activeTeams.forEach(team => {
+                teamStats[team] = {
+                    wins: 0,
+                    pointsScored: 0,
+                    pointsConceded: 0,
+                    differential: 0
+                };
+            });
+        }
+
+        function reshuffleTeams() {
+            // Shuffle activeTeams
+            let teams = activeTeams;
+            for (let i = teams.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [teams[i], teams[j]] = [teams[j], teams[i]];
+            }
+            activeTeams = teams;
+
+            // Redistribute teams into groups
+            const teamsPerGroup = Math.floor(activeTeams.length / 6);
+            const extraTeams = activeTeams.length % 6;
+            
+            groups = Array(6).fill().map((_, index) => {
+                const startIndex = index * teamsPerGroup + Math.min(index, extraTeams);
+                const groupSize = teamsPerGroup + (index < extraTeams ? 1 : 0);
+                return activeTeams.slice(startIndex, startIndex + groupSize);
+            });
+
+            // Update everything
+            initializeTeamStats();
+            updateTeamsList();
+            updateGroupsDisplay();
+            generateMatches();
+            updateMatchesDisplay();
+            updateStandings();
+        }
+
+        function removeTeam(teamName) {
+            activeTeams = activeTeams.filter(team => team !== teamName);
+            updateTeamsList();
+            initializeTeamStats();
+            generateGroups();
+        }
+
+        // Update teams list display
+        function updateTeamsList() {
+            const container = document.getElementById('teams-list');
+            container.innerHTML = activeTeams.map(team => `
+                <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+                    <span class="flex-grow">${team}</span>
+                    <button 
+                        onclick="removeTeam('${team}')" 
+                        class="text-red-500 hover:text-red-700 px-2"
+                    >
+                        ×
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function generateRandomScores() {
+            matches.forEach(match => {
+                let score1 = 0, score2 = 0;
+
+                // Generate scores such that one team reaches 21 points and has at least a 2-point lead
+                while (true) {
+                    score1 = Math.floor(Math.random() * 22); // Score can be between 0 and 21
+                    score2 = Math.floor(Math.random() * 22);
+
+                    // Ensure that one team reaches exactly 21 points
+                    if (score1 === 21 && score1 - score2 >= 2) {
+                        match.score1 = score1;
+                        match.score2 = score2;
+                        break;
+                    } else if (score2 === 21 && score2 - score1 >= 2) {
+                        match.score1 = score1;
+                        match.score2 = score2;
+                        break;
+                    }
+                }
+            });
+
+            // Update the display and standings after generating scores
+            updateMatchesDisplay();
+            updateStandings();
+        }
+
+        function generateMatches() {
+            matches = [];
+            const matchesPerGroup = 6; // Maximum number of matches in a group (4 teams = 6 matches)
+            const matchDuration = 20; // 20 minutes per match
+
+            // Generate all possible match combinations for each group
+            groups.forEach((group, courtIndex) => {
+                if (group.length >= 2) {
+                    let groupMatches = [];
+                    for (let i = 0; i < group.length; i++) {
+                        for (let j = i + 1; j < group.length; j++) {
+                            groupMatches.push({
+                                court: courtIndex + 1,
+                                team1: group[i],
+                                team2: group[j],
+                                score1: null,
+                                score2: null
+                            });
+                        }
+                    }
+                    matches = matches.concat(groupMatches);
+                }
+            });
+
+            // Assign synchronized times to all matches
+            const startTime = new Date();
+            startTime.setHours(9, 0, 0, 0); // Start at 9:00 AM
+
+            for (let matchIndex = 0; matchIndex < matchesPerGroup; matchIndex++) {
+                const matchTime = new Date(startTime);
+                matchTime.setMinutes(matchTime.getMinutes() + (matchIndex * matchDuration));
+
+                // Find all matches for this time slot (one per court)
+                groups.forEach((_, courtIndex) => {
+                    const courtMatches = matches.filter(m => m.court === courtIndex + 1);
+                    if (matchIndex < courtMatches.length) {
+                        courtMatches[matchIndex].startTime = new Date(matchTime);
+                    }
+                });
+            }
+        }
+
+        function updateGroupsDisplay() {
+            const container = document.getElementById('groups-container');
+            container.innerHTML = groups.map((group, index) => `
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold mb-2">Court ${index + 1}</h3>
+                    <ul class="list-disc pl-4">
+                        ${group.map(team => `<li class="mb-1">${team}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function updateMatchesDisplay() {
+            const container = document.getElementById('matches-container');
+            container.innerHTML = groups.map((groupTeams, groupIndex) => {
+                const groupMatches = matches.filter(
+                    match => groupTeams.includes(match.team1) || groupTeams.includes(match.team2)
+                );
+                return `
+                    <div class="border rounded-lg p-4">
+                        <h3 class="font-semibold mb-2">Group ${groupIndex + 1}</h3>
+                        <div class="text-sm text-gray-600 mb-4">
+                            <div class="font-medium mb-1">Teams:</div>
+                            ${groupTeams.map(team => `
+                                <div class="whitespace-nowrap overflow-hidden text-ellipsis">
+                                    ${team}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="space-y-4">
+                            ${groupMatches.map((match, matchIndex) => `
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                        <span>Court ${match.court}</span>
+                                        <span>${formatTime(match.startTime)}</span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                                            <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
+                                                ${match.team1}
+                                            </span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value="${match.score1 ?? ''}"
+                                                onchange="updateScore(${matchIndex}, this.value, null)"
+                                                class="text-center w-20 flex-shrink-0 border rounded p-1"
+                                                placeholder="Score"
+                                            >
+                                        </div>
+                                        <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                                            <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
+                                                ${match.team2}
+                                            </span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value="${match.score2 ?? ''}"
+                                                onchange="updateScore(${matchIndex}, null, this.value)"
+                                                class="text-center w-20 flex-shrink-0 border rounded p-1"
+                                                placeholder="Score"
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateScore(matchIndex, score1, score2) {
+            if (score1 !== null) matches[matchIndex].score1 = parseInt(score1) || 0;
+            if (score2 !== null) matches[matchIndex].score2 = parseInt(score2) || 0;
+            
+            // Reset all team stats
+            Object.keys(teamStats).forEach(team => {
+                teamStats[team] = {
+                    wins: 0,
+                    pointsScored: 0,
+                    pointsConceded: 0,
+                    differential: 0
+                };
+            });
+
+            // Recalculate all stats
+            matches.forEach(match => {
+                if (match.score1 !== null && match.score2 !== null) {
+                    // Update first team's stats
+                    teamStats[match.team1].pointsScored += match.score1;
+                    teamStats[match.team1].pointsConceded += match.score2;
+                    
+                    // Update second team's stats
+                    teamStats[match.team2].pointsScored += match.score2;
+                    teamStats[match.team2].pointsConceded += match.score1;
+                    
+                    // Update wins
+                    if (match.score1 > match.score2) {
+                        teamStats[match.team1].wins += 1;
+                    } else if (match.score2 > match.score1) {
+                        teamStats[match.team2].wins += 1;
+                    }
+                }
+            });
+
+            // Calculate differentials
+            Object.keys(teamStats).forEach(team => {
+                teamStats[team].differential = 
+                    teamStats[team].pointsScored - teamStats[team].pointsConceded;
+            });
+
+            updateStandings();
+        }
+
+        function updateStandings() {
+    // Reset all team stats
+        Object.keys(teamStats).forEach(team => {
+            teamStats[team] = {
+                wins: 0,
+                pointsScored: 0,
+                pointsConceded: 0,
+                differential: 0
+            };
+        });
+
+    // Recalculate all stats
+    matches.forEach(match => {
+        if (match.score1 !== null && match.score2 !== null) {
+            // Update first team's stats
+            teamStats[match.team1].pointsScored += match.score1;
+            teamStats[match.team1].pointsConceded += match.score2;
+
+            // Update second team's stats
+            teamStats[match.team2].pointsScored += match.score2;
+            teamStats[match.team2].pointsConceded += match.score1;
+
+            // Update wins
+            if (match.score1 > match.score2) {
+                teamStats[match.team1].wins += 1;
+            } else if (match.score2 > match.score1) {
+                teamStats[match.team2].wins += 1;
+            }
+        }
+    });
+
+    // Calculate differentials
+    Object.keys(teamStats).forEach(team => {
+        teamStats[team].differential =
+            teamStats[team].pointsScored - teamStats[team].pointsConceded;
+    });
+
+    // Update overall standings
+    const winsContainer = document.getElementById('wins-standings');
+    const winsSorted = Object.entries(teamStats)
+        .sort(([, a], [, b]) => b.wins - a.wins);
+
+    winsContainer.innerHTML = winsSorted.map(([team, stats], index) => `
+        <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+            <span>${index + 1}. ${team}</span>
+            <span class="font-semibold">${stats.wins} wins</span>
+        </div>
+    `).join('');
+
+    const diffContainer = document.getElementById('differential-standings');
+    const diffSorted = Object.entries(teamStats)
+        .sort(([, a], [, b]) => b.differential - a.differential);
+
+    diffContainer.innerHTML = diffSorted.map(([team, stats], index) => `
+        <div class="grid grid-cols-4 items-center p-2 bg-gray-100 rounded gap-2">
+            <span>${index + 1}. ${team}</span>
+            <span class="text-green-600">Scored: ${stats.pointsScored}</span>
+            <span class="text-red-600">Conceded: ${stats.pointsConceded}</span>
+            <span class="font-semibold text-right">
+                Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
+            </span>
+        </div>
+    `).join('');
+
+    // Update group standings
+    const groupsContainer = document.getElementById('group-standings');
+    groupsContainer.innerHTML = groups.map((groupTeams, groupIndex) => {
+        const groupStats = groupTeams.map(team => ({
+            team,
+            ...teamStats[team]
+        })).sort((a, b) => b.wins - a.wins || b.differential - a.differential);
+
+        return `
+            <div class="bg-white rounded-lg p-4 border mb-4">
+                <h3 class="font-semibold mb-2">Group ${groupIndex + 1}</h3>
+                ${groupStats.map((stats, index) => `
+                    <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+                        <span>${index + 1}. ${stats.team}</span>
+                        <span class="font-semibold">${stats.wins} wins</span>
+                        <span class="text-green-600">Scored: ${stats.pointsScored}</span>
+                        <span class="text-red-600">Conceded: ${stats.pointsConceded}</span>
+                        <span class="font-semibold text-right">
+                            Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
+                        </span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }).join('');
+}
+
+        // Initialize the tournament
+        generateGroups();
+
+        document.getElementById('newTeamInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTeam();
+            }
+        });
+    </script>
+</body>
+</html>
