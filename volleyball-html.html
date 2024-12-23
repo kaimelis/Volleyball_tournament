@@ -88,6 +88,9 @@
                         <button onclick="reshuffleTeams()" class="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
                             Reshuffle Teams
                         </button>
+                        <button onclick="clearTournamentData()" class="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                            Delete Tournament
+                        </button>
                     </div>
                 </div>
 
@@ -357,46 +360,46 @@
         }
 
     function generateMatches() {
-            matches = [];
-            const matchesPerGroup = 6; // Maximum number of matches in a group (4 teams = 6 matches)
-            const matchDuration = 20; // 20 minutes per match
+        matches = [];
+        const matchesPerGroup = 6; // Maximum number of matches in a group (4 teams = 6 matches)
+        const matchDuration = 20; // 20 minutes per match
 
-            // Generate all possible match combinations for each group
-            groups.forEach((group, courtIndex) => {
-                if (group.length >= 2) {
-                    let groupMatches = [];
-                    for (let i = 0; i < group.length; i++) {
-                        for (let j = i + 1; j < group.length; j++) {
-                            groupMatches.push({
-                                court: courtIndex + 1,
-                                team1: group[i],
-                                team2: group[j],
-                                score1: null,
-                                score2: null
-                            });
-                        }
+        // Generate all possible match combinations for each group
+        groups.forEach((group, courtIndex) => {
+            if (group.length >= 2) {
+                let groupMatches = [];
+                for (let i = 0; i < group.length; i++) {
+                    for (let j = i + 1; j < group.length; j++) {
+                        groupMatches.push({
+                            court: courtIndex + 1,
+                            team1: group[i],
+                            team2: group[j],
+                            score1: 0,
+                            score2: 0
+                        });
                     }
-                    matches = matches.concat(groupMatches);
+                }
+                matches = matches.concat(groupMatches);
+            }
+        });
+
+        // Assign synchronized times to all matches
+        const startTime = new Date();
+        startTime.setHours(9, 0, 0, 0); // Start at 9:00 AM
+
+        for (let matchIndex = 0; matchIndex < matchesPerGroup; matchIndex++) {
+            const matchTime = new Date(startTime);
+            matchTime.setMinutes(matchTime.getMinutes() + (matchIndex * matchDuration));
+
+            // Find all matches for this time slot (one per court)
+            groups.forEach((_, courtIndex) => {
+                const courtMatches = matches.filter(m => m.court === courtIndex + 1);
+                if (matchIndex < courtMatches.length) {
+                    courtMatches[matchIndex].startTime = new Date(matchTime);
                 }
             });
-
-            // Assign synchronized times to all matches
-            const startTime = new Date();
-            startTime.setHours(9, 0, 0, 0); // Start at 9:00 AM
-
-            for (let matchIndex = 0; matchIndex < matchesPerGroup; matchIndex++) {
-                const matchTime = new Date(startTime);
-                matchTime.setMinutes(matchTime.getMinutes() + (matchIndex * matchDuration));
-
-                // Find all matches for this time slot (one per court)
-                groups.forEach((_, courtIndex) => {
-                    const courtMatches = matches.filter(m => m.court === courtIndex + 1);
-                    if (matchIndex < courtMatches.length) {
-                        courtMatches[matchIndex].startTime = new Date(matchTime);
-                    }
-                });
-            }
         }
+    }
 
     function updateGroupsDisplay() {
         const container = document.getElementById('groups-container');
@@ -442,42 +445,45 @@
                         `).join('')}
                     </div>
                     <div class="space-y-4">
-                        ${groupMatches.map((match, matchIndex) => `
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <div class="flex justify-between text-sm text-gray-600 mb-2">
-                                    <span>Court ${match.court}</span>
-                                    <span>${formatTime(match.startTime)}</span>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
-                                        <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
-                                            ${match.team1}
-                                        </span>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value="${match.score1 ?? ''}"
-                                            onchange="updateScore(${matchIndex}, this.value, null)"
-                                            class="text-center w-20 flex-shrink-0 border rounded p-1"
-                                            placeholder="Score"
-                                        >
+                        ${groupMatches.map((match) => {
+                            const overallMatchIndex = matches.findIndex(m => m === match);
+                            return `
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                        <span>Court ${match.court}</span>
+                                        <span>${formatTime(match.startTime)}</span>
                                     </div>
-                                    <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
-                                        <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
-                                            ${match.team2}
-                                        </span>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value="${match.score2 ?? ''}"
-                                            onchange="updateScore(${matchIndex}, null, this.value)"
-                                            class="text-center w-20 flex-shrink-0 border rounded p-1"
-                                            placeholder="Score"
-                                        >
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                                            <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
+                                                ${match.team1}
+                                            </span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value="${match.score1 ?? 0}"
+                                                onchange="updateScore(${overallMatchIndex}, this.value, null)"
+                                                class="text-center w-20 flex-shrink-0 border rounded p-1"
+                                                placeholder="Score"
+                                            >
+                                        </div>
+                                        <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                                            <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
+                                                ${match.team2}
+                                            </span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value="${match.score2 ?? 0}"
+                                                onchange="updateScore(${overallMatchIndex}, null, this.value)"
+                                                class="text-center w-20 flex-shrink-0 border rounded p-1"
+                                                placeholder="Score"
+                                            >
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 </div>
             `;
@@ -485,47 +491,47 @@
     }
 
     function updateScore(matchIndex, score1, score2) {
-        if (score1 !== null) matches[matchIndex].score1 = parseInt(score1) || 0;
-        if (score2 !== null) matches[matchIndex].score2 = parseInt(score2) || 0;
+        // Find the correct match using the matchIndex
+        const match = matches[matchIndex];
         
-        // Reset all team stats
-        Object.keys(teamStats).forEach(team => {
-            teamStats[team] = {
-                wins: 0,
-                pointsScored: 0,
-                pointsConceded: 0,
-                differential: 0
-            };
-        });
+        if (!match) {
+            console.error('Match not found for index:', matchIndex);
+            return;
+        }
 
-        // Recalculate all stats
-        matches.forEach(match => {
-            if (match.score1 !== null && match.score2 !== null) {
-                // Update first team's stats
-                teamStats[match.team1].pointsScored += match.score1;
-                teamStats[match.team1].pointsConceded += match.score2;
-                
-                // Update second team's stats
-                teamStats[match.team2].pointsScored += match.score2;
-                teamStats[match.team2].pointsConceded += match.score1;
-                
-                // Update wins
-                if (match.score1 > match.score2) {
-                    teamStats[match.team1].wins += 1;
-                } else if (match.score2 > match.score1) {
-                    teamStats[match.team2].wins += 1;
-                }
+        // Update the scores for the correct match
+        if (score1 !== null) match.score1 = parseInt(score1) || 0;
+        if (score2 !== null) match.score2 = parseInt(score2) || 0;
+        
+        // Reset stats for the teams in this match only
+        [match.team1, match.team2].forEach(team => {
+            if (!teamStats[team]) {
+                teamStats[team] = { wins: 0, pointsScored: 0, pointsConceded: 0, differential: 0 };
             }
         });
 
-        // Calculate differentials
-        Object.keys(teamStats).forEach(team => {
+        // Recalculate stats for this match
+        teamStats[match.team1].pointsScored += match.score1;
+        teamStats[match.team1].pointsConceded += match.score2;
+        teamStats[match.team2].pointsScored += match.score2;
+        teamStats[match.team2].pointsConceded += match.score1;
+
+        // Update wins
+        if (match.score1 > match.score2) {
+            teamStats[match.team1].wins += 1;
+        } else if (match.score2 > match.score1) {
+            teamStats[match.team2].wins += 1;
+        }
+
+        // Recalculate differentials
+        [match.team1, match.team2].forEach(team => {
             teamStats[team].differential = 
                 teamStats[team].pointsScored - teamStats[team].pointsConceded;
         });
 
+        updateMatchesDisplay();
         updateStandings();
-        saveToLocalStorage(); 
+        saveToLocalStorage();
     }
 
     function updateStandings() {
@@ -661,7 +667,7 @@
         
         closeSwitchTeamModal();
     }
-
+    
     function loadFromLocalStorage() {
         const savedData = localStorage.getItem('volleyballTournament');
         if (!savedData) return false;
@@ -674,7 +680,9 @@
             groups = tournamentData.groups;
             matches = tournamentData.matches.map(match => ({
                 ...match,
-                startTime: new Date(match.startTime) // Convert string back to Date
+                startTime: new Date(match.startTime), // Convert string back to Date
+                score1: match.score1 ?? 0, // Initialize to 0 if null
+                score2: match.score2 ?? 0  // Initialize to 0 if null
             }));
             teamStats = tournamentData.teamStats;
             isFirstGeneration = tournamentData.isFirstGeneration;
@@ -707,6 +715,11 @@
         localStorage.setItem('volleyballTournament', JSON.stringify(tournamentData));
     }
 
+    function clearTournamentData() {
+        localStorage.removeItem('volleyballTournament');
+        location.reload(); // Reload the page to reset all data
+    }
+
     generateGroups();
     document.getElementById('newTeamInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
@@ -718,7 +731,6 @@
         if (!loaded) {
             toggleTournament();
         }
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
     });
     </script>
 </body>
