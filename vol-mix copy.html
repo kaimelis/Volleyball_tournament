@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mixed Beach Volleyball Tournament</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .stage-header {
+      background-color: #34495e;
+      color: white;
+      padding: 10px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .table th, .table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    .table th {
+      background-color: #2980b9;
+      color: white;
+    }
+    .table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .winner {
+      font-weight: bold;
+    }
+    .match-time {
+      width: 15%;
+      font-weight: bold;
+    }
+    .time-toggle {
+      text-align: center;
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #ecf0f1;
+      border-radius: 5px;
+    }
+    .time-toggle label {
+      margin-right: 10px;
+    }
+    .time-toggle select {
+      padding: 5px;
+      border-radius: 3px;
+    }
+    .occupied-court {
+      background-color: #ffebee;
+      color: #c62828;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mixed Beach Volleyball Tournament</h1>
+    
+    <div class="time-toggle">
+      <label for="startTime">Tournament Start Time:</label>
+        <input type="time" id="startTime" onchange="updateTimes()" value="09:00">
+      </select>
+
+      <label for="teamCount" style="margin-left: 20px;">Number of Teams:</label>
+      <select id="teamCount" onchange="updateTeamStructure()">
+        <option value="24">24 Teams (6 groups of 4)</option>
+        <option value="22">22 Teams (4 groups of 4, 2 groups of 3)</option>
+        <option value="20">20 Teams (4 groups of 4, 1 group of 4)</option>
+        <option value="18">18 Teams (6 groups of 3)</option>
+        <option value="16">16 Teams (4 groups of 4)</option>
+      </select>
+    </div>
+
+    <div class="tournament-info" id="tournamentInfo">
+      <div class="info-box">
+        <h3>Tournament Structure</h3>
+        <div id="structure24" class="structure-info">
+          • 24 Teams Total
+          • Initial Stage: 6 Groups of 4 Teams
+          • After Group Stage: All teams advance to Division Stage
+          • Top half of teams to Hard Division (12 teams)
+          • Bottom half of teams to Light Division (12 teams)
+        </div>
+        <div id="structure22" class="structure-info" style="display: none;">
+          • 22 Teams Total
+          • Initial Stage: 4 Groups of 4 Teams, 2 Groups of 3
+          • After Group Stage: All teams advance to Division Stage
+          • Top 11 teams to Hard Division
+          • Bottom 11 teams to Light Division
+        </div>
+        <div id="structure20" class="structure-info" style="display: none;">
+          • 20 Teams Total
+          • Initial Stage: 5 Groups of 4 Teams
+          • After Group Stage: All teams advance to Division Stage
+          • Top 10 teams to Hard Division
+          • Bottom 10 teams to Light Division
+        </div>
+        <div id="structure18" class="structure-info" style="display: none;">
+          • 18 Teams Total
+          • Initial Stage: 6 Groups of 3 Teams
+          • After Group Stage: All teams advance to Division Stage
+          • Top 9 teams to Hard Division
+          • Bottom 9 teams to Light Division
+        </div>
+        <div id="structure16" class="structure-info" style="display: none;">
+          • 16 Teams Total
+          • Initial Stage: 4 Groups of 4 Teams
+          • After Group Stage: All teams advance to Division Stage
+          • Top 8 teams to Hard Division
+          • Bottom 8 teams to Light Division
+        </div>
+      </div>
+    </div>
+
+    <!-- Initial Team Groups -->
+    <div class="stage-header">
+      <h2>Initial Team Groups</h2>
+    </div>
+    <div id="teamGroups">
+      <!-- 24 Teams Structure -->
+      <table class="table" id="groups24">
+        <thead>
+          <tr>
+            <th>Group A</th>
+            <th>Group B</th>
+            <th>Group C</th>
+            <th>Group D</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Mix Masters</td>
+            <td>Sand Fusion</td>
+            <td>Dual Force</td>
+            <td>Beach United</td>
+          </tr>
+          <tr>
+            <td>Wave Alliance</td>
+            <td>Beach United</td>
+            <td>Wave Alliance</td>
+            <td>Sunset Mix</td>
+          </tr>
+          <tr>
+            <td>Unity Spikers</td>
+            <td>Volley Blend</td>
+            <td>Mix Masters</td>
+            <td>Sand Fusion</td>
+          </tr>
+          <tr>
+            <td>Coastal Elite</td>
+            <td>Sand Stars</td>
+            <td>Beach Kings</td>
+            <td>Net Ninjas</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 22 Teams Structure -->
+      <table class="table" id="groups22" style="display: none;">
+        <thead>
+          <tr>
+            <th>Group A (4)</th>
+            <th>Group B (4)</th>
+            <th>Group C (4)</th>
+            <th>Group D (4)</th>
+            <th>Group E (3)</th>
+            <th>Group F (3)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Similar structure but with 22 teams -->
+        </tbody>
+      </table>
+
+      <!-- Other team structures (20, 18, 16) -->
+      <!-- Similar tables with appropriate team counts -->
+    </div>
+
+    <!-- First Stage -->
+    <div class="stage-header">
+      <h2>Group Stage</h2>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Court 1</th>
+          <th>Court 2</th>
+          <th>Court 3</th>
+          <th>Court 4</th>
+          <th>Court 5</th>
+          <th>Court 6</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="time-slot" data-offset="0">
+          <td class="match-time">6:30 PM</td>
+          <td class="match-cell occupied-court">Men's Final Match</td>
+          <td class="match-cell occupied-court">Men's Final Match</td>
+          <td class="match-cell occupied-court">Men's Bronze Match</td>
+          <td class="match-cell occupied-court">Men's Bronze Match</td>
+          <td class="match-cell">A: <span class="winner">Mix Masters</span> vs Unity Spikers</td>
+          <td class="match-cell">B: <span class="winner">Sand Fusion</span> vs Volley Blend</td>
+        </tr>
+        <tr class="time-slot" data-offset="20">
+          <td class="match-time">6:50 PM</td>
+          <td class="match-cell occupied-court">Men's Final Match</td>
+          <td class="match-cell occupied-court">Men's Final Match</td>
+          <td class="match-cell occupied-court">Men's Bronze Match</td>
+          <td class="match-cell occupied-court">Men's Bronze Match</td>
+          <td class="match-cell">C: Dual Force vs <span class="winner">Wave Alliance</span></td>
+          <td class="match-cell">D: <span class="winner">Beach United</span> vs Sunset Mix</td>
+        </tr>
+        <tr class="time-slot" data-offset="40">
+          <td class="match-time">7:10 PM</td>
+          <td class="match-cell">A: <span class="winner">Mix Masters</span> vs Wave Alliance</td>
+          <td class="match-cell">B: <span class="winner">Sand Fusion</span> vs Beach United</td>
+          <td class="match-cell">C: <span class="winner">Dual Force</span> vs Unity Spikers</td>
+          <td class="match-cell">D: Sunset Mix vs <span class="winner">Volley Blend</span></td>
+          <td class="match-cell">A: <span class="winner">Power Pairs</span> vs Net Balance</td>
+          <td class="match-cell">B: Team Synergy vs <span class="winner">Coast Combo</span></td>
+        </tr>
+        <tr class="time-slot" data-offset="60">
+          <td class="match-time">7:30 PM</td>
+          <td class="match-cell">C: Unity Spikers vs <span class="winner">Wave Alliance</span></td>
+          <td class="match-cell">D: Volley Blend vs <span class="winner">Beach United</span></td>
+          <td class="match-cell">C: Unity Spikers vs <span class="winner">Wave Alliance</span></td>
+          <td class="match-cell">D: Volley Blend vs <span class="winner">Beach United</span></td>
+          <td class="match-cell"></td>
+          <td class="match-cell"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Division Stage -->
+    <div class="stage-header">
+      <h2>Division Stage Groups (After Group Stage)</h2>
+    </div>
+    <!-- 24 Teams Division Structure -->
+    <div id="divisions24">
+      <table class="table">
+        <thead>
+          <tr>
+            <th colspan="3">Hard Division (Top 12 Teams)</th>
+            <th colspan="3">Light Division (Bottom 12 Teams)</th>
+          </tr>
+          <tr>
+            <th>Group H1</th>
+            <th>Group H2</th>
+            <th>Group H3</th>
+            <th>Group L1</th>
+            <th>Group L2</th>
+            <th>Group L3</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="6" class="division-note">Teams will be sorted into division groups based on Group Stage performance</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 22 Teams Division Structure -->
+    <div id="divisions22" style="display: none;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th colspan="3">Hard Division (11 Teams)</th>
+            <th colspan="3">Light Division (11 Teams)</th>
+          </tr>
+          <tr>
+            <th>Group H1 (4)</th>
+            <th>Group H2 (4)</th>
+            <th>Group H3 (3)</th>
+            <th>Group L1 (4)</th>
+            <th>Group L2 (4)</th>
+            <th>Group L3 (3)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="6" class="division-note">Teams will be sorted into division groups based on Group Stage performance</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Similar structures for 20, 18, and 16 teams -->
+    <!-- Each showing appropriate division and group sizes -->
+
+    <!-- Second Stage -->
+    <div class="stage-header">
+      <h2>Second Stage</h2>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Court 1 (Hard)</th>
+          <th>Court 2 (Hard)</th>
+          <th>Court 3 (Hard)</th>
+          <th>Court 4 (Light)</th>
+          <th>Court 5 (Light)</th>
+          <th>Court 6 (Light)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="time-slot" data-offset="60">
+          <td class="match-time">7:30 PM</td>
+          <td>H1: <span class="winner">Mix Masters</span> vs Unity Spikers</td>
+          <td>H2: <span class="winner">Sand Fusion</span> vs Volley Blend</td>
+          <td>H3: <span class="winner">Wave Alliance</span> vs Dual Force</td>
+          <td>L1: <span class="winner">Beach United</span> vs Power Pairs</td>
+          <td>L2: <span class="winner">Coast Combo</span> vs Team Synergy</td>
+          <td>L3: Net Balance vs <span class="winner">Sunset Mix</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Elimination Round -->
+    <div class="stage-header">
+      <h2>Elimination Round</h2>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Court 1</th>
+          <th>Court 2</th>
+          <th>Court 3</th>
+          <th>Court 4</th>
+          <th>Court 5</th>
+          <th>Court 6</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="time-slot" data-offset="80">
+          <td class="match-time">7:50 PM</td>
+          <td>H-QF1: <span class="winner">Mix Masters</span> vs Wave Alliance</td>
+          <td>H-QF2: <span class="winner">Sand Fusion</span> vs Unity Spikers</td>
+          <td>H-QF3: Dual Force vs <span class="winner">Volley Blend</span></td>
+          <td>L-QF1: <span class="winner">Beach United</span> vs Net Balance</td>
+          <td>L-QF2: <span class="winner">Coast Combo</span> vs Sunset Mix</td>
+          <td>L-QF3: Power Pairs vs <span class="winner">Team Synergy</span></td>
+        </tr>
+        <tr class="time-slot" data-offset="100">
+          <td class="match-time">8:10 PM</td>
+          <td>H-SF1: <span class="winner">Mix Masters</span> vs Volley Blend</td>
+          <td>H-SF2: <span class="winner">Sand Fusion</span> vs Wave Alliance</td>
+          <td>L-SF1: <span class="winner">Beach United</span> vs Team Synergy</td>
+          <td>L-SF2: <span class="winner">Coast Combo</span> vs Net Balance</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr class="time-slot" data-offset="120">
+          <td class="match-time">8:30 PM</td>
+          <td>Hard Division Final: <span class="winner">Mix Masters</span> vs Sand Fusion</td>
+          <td>Light Division Final: Beach United vs <span class="winner">Coast Combo</span></td>
+          <td>Hard Bronze: <span class="winner">Volley Blend</span> vs Wave Alliance</td>
+          <td>Light Bronze: <span class="winner">Team Synergy</span> vs Net Balance</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+
+let draggedElement = null;
+
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+function drag(ev) {
+  draggedElement = ev.target;
+}
+
+function drop(ev) {
+  ev.preventDefault();
+  if (ev.target.classList.contains('match-cell')) {
+    const temp = ev.target.innerHTML;
+    ev.target.innerHTML = draggedElement.innerHTML;
+    draggedElement.innerHTML = temp;
+    
+    // Re-add event listeners to the moved elements
+    addRemoveButtons();
+    addDragAndDropListeners();
+    
+    console.log(`Moved game from ${draggedElement.parentElement.querySelector('.match-time').textContent} to ${ev.target.parentElement.querySelector('.match-time').textContent}`);
+  }
+}
+
+function addDragAndDropListeners() {
+  document.querySelectorAll('.match-cell').forEach(cell => {
+    cell.setAttribute('draggable', 'true');
+    cell.addEventListener('dragstart', drag);
+    cell.addEventListener('dragover', allowDrop);
+    cell.addEventListener('drop', drop);
+  });
+}
+
+function addRemoveButtons() {
+  document.querySelectorAll('.match-cell').forEach(cell => {
+    if (cell.textContent.trim() !== '' && !cell.querySelector('button')) {
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'Remove';
+      removeButton.onclick = function() { removeGame(this); };
+      cell.appendChild(removeButton);
+    }
+  });
+}
+
+// Modify the existing removeGame function
+function removeGame(button) {
+  const cell = button.parentElement;
+  cell.innerHTML = '';
+  updateTimes();
+  console.log(`Removed game from ${cell.parentElement.querySelector('.match-time').textContent}`);
+}
+
+    function updateTimes() {
+      const startTimeInput = document.getElementById('startTime').value;
+      const [baseHour, baseMinute] = startTimeInput.split(':');
+      
+      let currentHour = parseInt(baseHour);
+      let currentMinute = parseInt(baseMinute);
+    
+      document.querySelectorAll('.time-slot').forEach((slot, index) => {
+        // Skip empty slots
+        if (Array.from(slot.children).slice(1).every(cell => cell.textContent.trim() === '')) {
+          return;
+        }
+    
+        // Calculate new time
+        if (index > 0) {
+          currentMinute += 20;
+          if (currentMinute >= 60) {
+            currentHour++;
+            currentMinute -= 60;
+          }
+        }
+    
+        // Format the time string
+        const period = currentHour >= 12 ? 'PM' : 'AM';
+        const formattedHour = currentHour % 12 || 12;
+        const timeString = `${formattedHour}:${currentMinute.toString().padStart(2, '0')} ${period}`;
+        slot.querySelector('.match-time').textContent = timeString;
+    
+        // Log the change
+        console.log(`Updated time for slot ${index + 1} to ${timeString}`);
+      });
+    }
+    
+    // Add remove buttons to all game cells
+    document.querySelectorAll('.table td:not(.match-time)').forEach(cell => {
+      if (cell.textContent.trim() !== '') {
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.onclick = function() { removeGame(this); };
+        cell.appendChild(removeButton);
+      }
+    });
+
+    // Modify the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+  updateTimes();
+  addRemoveButtons();
+  addDragAndDropListeners();
+});
+    
+    </script>
+</body>
+</html>

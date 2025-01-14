@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beach Volleyball Tournament Results</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .stage-header {
+      background-color: #34495e;
+      color: white;
+      padding: 10px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .table th, .table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    .table th {
+      background-color: #2980b9;
+      color: white;
+    }
+    .table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .winner {
+      font-weight: bold;
+    }
+    .match-time {
+      width: 15%;
+      font-weight: bold;
+    }
+    .free-court {
+      background-color: #e8f8f5;
+      color: #95a5a6;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Beach Volleyball Tournament Results</h1>
+    
+    <!-- First Stage -->
+    <div class="stage-header">
+      <h2>Group Stage</h2>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Court 1</th>
+          <th>Court 2</th>
+          <th>Court 3</th>
+          <th>Court 4</th>
+          <th>Court 5</th>
+          <th>Court 6</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="match-time">8:30 AM</td>
+          <td>A: <span class="winner">Goda/Julija</span> vs. Teisininkai</td>
+          <td>B: Vaiva&Fausta vs. <span class="winner">Blokelis</span></td>
+          <td>C: <span class="winner">Laura M. & Jovita V.</span> vs. Kuzina & G.</td>
+          <td>D: Rimgailė & Laima vs. <span class="winner">R.milevskaja i.P.</span></td>
+          <td>E: <span class="winner">Linos mokykla</span> vs. Savostenok ir Š.</td>
+          <td>F: Gadelkytė/V. vs. <span class="winner">Raupelienė su Ž.</span></td>
+        </tr>
+        <tr>
+          <td class="match-time">8:50 AM</td>
+          <td>A: <span class="winner">Dovilė B. & Laura T.</span> vs. Ieva ir Rūta</td>
+          <td>B: <span class="winner">Brukštienė, G.</span> vs. Lyskoit - S.</td>
+          <td>C: Ramalė/M. vs. <span class="winner">Mažena G. & Evelina V.</span></td>
+          <td>D: <span class="winner">Veda ir Agne</span> vs. Kimono</td>
+          <td>E: Aistė ir K. vs. <span class="winner">Petrauske/D.</span></td>
+          <td>F: <span class="winner">Abukauskaitė ir D.</span> vs. Ivanova ir P.</td>
+        </tr>
+        <tr>
+          <td class="match-time">9:10 AM</td>
+          <td>A: <span class="winner">Goda/Julija</span> vs. Dovilė B. & Laura T.</td>
+          <td>B: <span class="winner">Vaiva&Fausta</span> vs. Brukštienė, G.</td>
+          <td>C: Laura M. & Jovita V. vs. <span class="winner">Ramalė/M.</span></td>
+          <td>D: <span class="winner">Rimgailė & L.</span> vs. Veda ir Agne</td>
+          <td>E: Linos mokykla vs. <span class="winner">Aistė ir K.</span></td>
+          <td>F: <span class="winner">Gadelkytė/V.</span> vs. Abukauskaitė ir D.</td>
+        </tr>
+        <tr>
+          <td class="match-time">9:30 AM</td>
+          <td>A: Teisininkai vs. <span class="winner">Ieva ir Rūta</span></td>
+          <td>B: <span class="winner">Blokelis</span> vs. Lyskoit - S.</td>
+          <td>C: <span class="winner">Kuzina & G.</span> vs. Mažena G. & Evelina V.</td>
+          <td>D: R.milevskaja i.P. vs. <span class="winner">Kimono</span></td>
+          <td>E: <span class="winner">Savostenok ir Š.</span> vs. Petrauske/D.</td>
+          <td>F: Raupelienė su Ž. vs. <span class="winner">Ivanova ir P.</span></td>
+        </tr>
+        <tr>
+          <td class="match-time">9:50 AM</td>
+          <td>A: <span class="winner">Goda/Julija</span> vs. Ieva ir Rūta</td>
+          <td>B: Vaiva&Fausta vs. <span class="winner">Lyskoit - S.</span></td>
+          <td>C: <span class="winner">Laura M. & Jovita V.</span> vs. Mažena G.</td>
+          <td>D: Rimgailė & L. vs. <span class="winner">Kimono</span></td>
+          <td>E: <span class="winner">Linos mokykla</span> vs. Petrauske/D.</td>
+          <td>F: Gadelkytė/V. vs. <span class="winner">Ivanova ir P.</span></td>
+        </tr>
+        <tr>
+          <td class="match-time">10:10 AM</td>
+          <td>A: <span class="winner">Teisininkai</span> vs. Dovilė B. & Laura T.</td>
+          <td>B: Blokelis vs. <span class="winner">Brukštienė, G.</span></td>
+          <td>C: Kuzina & G. vs. <span class="winner">Ramalė/M.</span></td>
+          <td>D: <span class="winner">Veda ir Agne</span> vs. R.milevskaja i.P.</td>
+          <td>E: Savostenok ir Š. vs. <span class="winner">Aistė ir K.</span></td>
+          <td>F: <span class="winner">Raupelienė su Ž.</span> vs. Abukauskaitė ir D.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Division Groupings -->
+    <div class="stage-header">
+      <h2>Division Groupings After First Stage</h2>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th colspan="3">Hard Division Groups</th>
+          <th colspan="3">Light Division Groups</th>
+        </tr>
+        <tr>
+          <th>Group H1</th>
+          <th>Group H2</th>
+          <th>Group H3</th>
+          <th>Group L1</th>
+          <th>Group L2</th>
+          <th>Group L3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Goda/Julija</td>
+          <td>Vaiva&Fausta</td>
+          <td>Laura M. & Jovita V.</td>
+          <td>R.milevskaja i.P.</td>
+          <td>Kimono</td>
+          <td>Ivanova ir P.</td>
+        </tr>
+        <tr>
+          <td>Blokelis</td>
+          <td>Ramalė/M.</td>
+          <td>Brukštienė, G.</td>
+          <td>Veda ir Agne</td>
+          <td>Petrauske/D.</td>
+          <td>Abukauskaitė ir D.</td>
+        </tr>
+        <tr>
+          <td>Teisininkai</td>
+          <td>Kuzina & G.</td>
+          <td>Linos mokykla</td>
+          <td>Savostenok ir Š.</td>
+          <td>Aistė ir K.</td>
+          <td>Raupelienė su Ž.</td>
+        </tr>
+        <tr>
+          <td>Dovilė B. & Laura T.</td>
+          <td>Mažena G. & Evelina V.</td>
+          <td>Lyskoit - S.</td>
+          <td>Rimgailė & L.</td>
+          <td>Ieva ir Rūta</td>
+          <td>Gadelkytė/V.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Second Stage -->
+    <div class="stage-header">
+      <h2>Second Stage (Hard & Light Divisions)</h2>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Court 1 (H1)</th>
+          <th>Court 2 (H2)</th>
+          <th>Court 3 (H3)</th>
+          <th>Court 4 (L1)</th>
+          <th>Court 5 (L2)</th>
+          <th>Court 6 (L3)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Round 1 -->
+        <tr>
+          <td class="match-time">10:30 AM</td>
+          <td>H1: <span class="winner">Goda/Julija</span> vs Blokelis</td>
+          <td>H2: <span class="winner">Vaiva&Fausta</span> vs Ramalė/M.</td>
+          <td>H3: <span class="winner">Laura M. & Jovita V.</span> vs Brukštienė, G.</td>
+          <td>L1: <span class="winner">R.milevskaja i.P.</span> vs Veda ir Agne</td>
+          <td>L2: <span class="winner">Kimono</span> vs Petrauske/D.</td>
+          <td>L3: <span class="winner">Ivanova ir P.</span> vs Abukauskaitė ir D.</td>
+        </tr>
+        <!-- Round 2 -->
+        <tr>
+          <td class="match-time">10:50 AM</td>
+          <td>H1: <span class="winner">Teisininkai</span> vs Dovilė B. & Laura T.</td>
+          <td>H2: <span class="winner">Kuzina & G.</span> vs Mažena G. & Evelina V.</td>
+          <td>H3: Linos mokykla vs <span class="winner">Lyskoit - S.</span></td>
+          <td>L1: <span class="winner">Savostenok ir Š.</span> vs Rimgailė & L.</td>
+          <td>L2: Aistė ir K. vs <span class="winner">Ieva ir Rūta</span></td>
+          <td>L3: <span class="winner">Raupelienė su Ž.</span> vs Gadelkytė/V.</td>
+        </tr>
+        <!-- Round 3 -->
+        <tr>
+          <td class="match-time">11:10 AM</td>
+          <td>H1: <span class="winner">Goda/Julija</span> vs Teisininkai</td>
+          <td>H2: Vaiva&Fausta vs <span class="winner">Kuzina & G.</span></td>
+          <td>H3: <span class="winner">Laura M. & Jovita V.</span> vs Linos mokykla</td>
+          <td>L1: R.milevskaja i.P. vs <span class="winner">Savostenok ir Š.</span></td>
+          <td>L2: <span class="winner">Kimono</span> vs Aistė ir K.</td>
+          <td>L3: <span class="winner">Ivanova ir P.</span> vs Raupelienė su Ž.</td>
+        </tr>
+        <!-- Round 4 -->
+        <tr>
+          <td class="match-time">11:30 AM</td>
+          <td>H1: <span class="winner">Blokelis</span> vs Dovilė B. & Laura T.</td>
+          <td>H2: <span class="winner">Ramalė/M.</span> vs Mažena G. & Evelina V.</td>
+          <td>H3: Brukštienė, G. vs <span class="winner">Lyskoit - S.</span></td>
+          <td>L1: <span class="winner">Veda ir Agne</span> vs Rimgailė & L.</td>
+          <td>L2: Petrauske/D. vs <span class="winner">Ieva ir Rūta</span></td>
+          <td>L3: Abukauskaitė ir D. vs <span class="winner">Gadelkytė/V.</span></td>
+        </tr>
+        <!-- Round 5 -->
+        <tr>
+          <td class="match-time">11:50 AM</td>
+          <td>H1: <span class="winner">Goda/Julija</span> vs Dovilė B. & Laura T.</td>
+          <td>H2: <span class="winner">Vaiva&Fausta</span> vs Mažena G. & Evelina V.</td>
+          <td>H3: Laura M. & Jovita V. vs <span class="winner">Lyskoit - S.</span></td>
+          <td>L1: <span class="winner">R.milevskaja i.P.</span> vs Rimgailė & L.</td>
+          <td>L2: <span class="winner">Kimono</span> vs Ieva ir Rūta</td>
+          <td>L3: <span class="winner">Ivanova ir P.</span> vs Gadelkytė/V.</td>
+        </tr>
+        <!-- Round 6 -->
+        <tr>
+          <td class="match-time">12:10 PM</td>
+          <td>H1: <span class="winner">Blokelis</span> vs Teisininkai</td>
+          <td>H2: Ramalė/M. vs <span class="winner">Kuzina & G.</span></td>
+          <td>H3: <span class="winner">Brukštienė, G.</span> vs Linos mokykla</td>
+          <td>L1: <span class="winner">Veda ir Agne</span> vs Savostenok ir Š.</td>
+          <td>L2: <span class="winner">Petrauske/D.</span> vs Aistė ir K.</td>
+          <td>L3: <span class="winner">Abukauskaitė ir D.</span> vs Raupelienė su Ž.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Elimination Round -->
+    <div class="stage-header">
+      <h2>Elimination Round</h2>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Court 1</th>
+          <th>Court 2</th>
+          <th>Court 3</th>
+          <th>Court 4</th>
+          <th>Court 5</th>
+          <th>Court 6</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- First Round -->
+        <tr>
+          <td class="match-time">12:30 PM</td>
+          <td>H-R1: <span class="winner">Goda/Julija</span>(H1-1) vs Kuzina & G.(H2-2)</td>
+          <td>H-R1: <span class="winner">Vaiva&Fausta</span>(H2-1) vs Laura M. & Jovita V.(H3-2)</td>
+          <td>H-R1: <span class="winner">Blokelis</span>(H1-2) vs Lyskoit - S.(H3-3)</td>
+          <td>L-R1: <span class="winner">R.milevskaja i.P.</span>(L1-1) vs Aistė ir K.(L2-2)</td>
+          <td>L-R1: <span class="winner">Kimono</span>(L2-1) vs Ivanova ir P.(L3-2)</td>
+          <td>L-R1: <span class="winner">Veda ir Agne</span>(L1-2) vs Raupelienė su Ž.(L3-3)</td>
+        </tr>
+        <tr>
+          <td class="match-time">12:50 PM</td>
+          <td>H-R1: <span class="winner">Teisininkai</span>(H1-3) vs Brukštienė, G.(H3-1)</td>
+          <td>H-R1: Ramalė/M.(H2-3) vs <span class="winner">Linos mokykla</span>(H3-2)</td>
+          <td>H-R1: Mažena G. & Evelina V.(H2-2) vs <span class="winner">Linos mokykla</span>(H3-2)</td>
+          <td>L-R1: <span class="winner">Savostenok ir Š.</span>(L1-3) vs Petrauske/D.(L2-1)</td>
+          <td>L-R1: Ieva ir Rūta(L2-3) vs <span class="winner">Abukauskaitė ir D.</span>(L3-2)</td>
+          <td>L-R1: Rimgailė & L.(L1-2) vs <span class="winner">Gadelkytė/V.</span>(L3-1)</td>
+        </tr>
+        <!-- Quarter-finals -->
+        <tr>
+          <td class="match-time">1:10 PM</td>
+          <td>H-QF: <span class="winner">Goda/Julija</span> vs Teisininkai</td>
+          <td>H-QF: <span class="winner">Vaiva&Fausta</span> vs Blokelis</td>
+          <td>H-QF: Brukštienė, G. vs <span class="winner">Linos mokykla</span></td>
+          <td>L-QF: <span class="winner">R.milevskaja i.P.</span> vs Savostenok ir Š.</td>
+          <td>L-QF: <span class="winner">Kimono</span> vs Veda ir Agne</td>
+          <td>L-QF: Petrauske/D. vs <span class="winner">Gadelkytė/V.</span></td>
+        </tr>
+        <!-- Semi-finals -->
+        <tr>
+          <td class="match-time">1:30 PM</td>
+          <td>H-SF: <span class="winner">Goda/Julija</span> vs Linos mokykla</td>
+          <td>H-SF: Vaiva&Fausta vs <span class="winner">Blokelis</span></td>
+          <td>L-SF: <span class="winner">R.milevskaja i.P.</span> vs Gadelkytė/V.</td>
+          <td>L-SF: Kimono vs <span class="winner">Veda ir Agne</span></td>
+          <td class="free-court">FREE</td>
+          <td class="free-court">FREE</td>
+        </tr>
+        <!-- Finals -->
+        <tr>
+          <td class="match-time">1:50 PM</td>
+          <td>Hard Division Final: <span class="winner">Goda/Julija</span> vs Blokelis</td>
+          <td>Light Division Final: R.milevskaja i.P. vs <span class="winner">Veda ir Agne</span></td>
+          <td>Hard Division Bronze: Vaiva&Fausta vs <span class="winner">Linos mokykla</span></td>
+          <td>Light Division Bronze: <span class="winner">Kimono</span> vs Gadelkytė/V.</td>
+          <td class="free-court">FREE</td>
+          <td class="free-court">FREE</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
