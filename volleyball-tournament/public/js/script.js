@@ -159,77 +159,105 @@ function setupEventListeners(container, type) {
 }
 
 function splitIntoLightAndHard() {
-const allTeams = tournamentStates.all.activeTeams;
-const allStats = tournamentStates.all.teamStats;
-
-// Sort teams based on wins and then point differential
-const sortedTeams = allTeams.sort((a, b) => {
-    if (allStats[b].wins !== allStats[a].wins) {
-        return allStats[b].wins - allStats[a].wins;
-    }
-    return allStats[b].differential - allStats[a].differential;
-});
-
-const midpoint = Math.ceil(sortedTeams.length / 2);
-const hardTeams = sortedTeams.slice(0, midpoint);
-const lightTeams = sortedTeams.slice(midpoint);
-
-// Update light and hard states
-tournamentStates.light.activeTeams = lightTeams;
-tournamentStates.hard.activeTeams = hardTeams;
-
-// Reset groups for light and hard
-tournamentStates.light.groups = [[], [], []];
-tournamentStates.hard.groups = [[], [], []];
-
-// Distribute teams to groups
-distributeTeamsToGroups(tournamentStates.light);
-distributeTeamsToGroups(tournamentStates.hard);
-
-// Generate new matches for light and hard
-generateMatches('light');
-generateMatches('hard');
-
-// Update displays
-updateGroupsDisplay('light');
-updateGroupsDisplay('hard');
-updateMatchesDisplay('light');
-updateMatchesDisplay('hard');
-updateStandings('light');
-updateStandings('hard');
-
-// Save to local storage
-saveToLocalStorage();
-}
-
-function updateLightHardStandings() {
-const lightContainer = document.querySelector('.light-standings');
-const hardContainer = document.querySelector('.hard-standings');
-
-if (typeof getTeamStandings === 'function') {
-    const standings = getTeamStandings();
-    lightContainer.innerHTML = standings.light.map((team, index) => `
-        <div class="p-2 bg-gray-100 rounded">
-            ${index + 1}. ${team}
-        </div>
-    `).join('');
+    const allTeams = tournamentStates.all.activeTeams;
+    const allStats = tournamentStates.all.teamStats;
     
-    hardContainer.innerHTML = standings.hard.map((team, index) => `
-        <div class="p-2 bg-gray-100 rounded">
-            ${index + 1}. ${team}
-        </div>
-    `).join('');
-} else {
-    console.error('Function getTeamStandings is not defined');
-}
+    // Sort teams by wins and then point differential
+    const sortedTeams = allTeams.sort((a, b) => {
+        if (allStats[b].wins !== allStats[a].wins) {
+            return allStats[b].wins - allStats[a].wins;
+        }
+        return allStats[b].differential - allStats[a].differential;
+    });
+
+    const midpoint = Math.ceil(sortedTeams.length / 2);
+    const hardTeams = sortedTeams.slice(0, midpoint);
+    const lightTeams = sortedTeams.slice(midpoint);
+
+    // Update light and hard states
+    tournamentStates.light.activeTeams = lightTeams;
+    tournamentStates.hard.activeTeams = hardTeams;
+
+    // Reset groups for light and hard
+    tournamentStates.light.groups = [[], [], []];
+    tournamentStates.hard.groups = [[], [], []];
+
+    // Distribute teams to groups
+    distributeTeamsToGroups(tournamentStates.light);
+    distributeTeamsToGroups(tournamentStates.hard);
+
+    // Generate new matches for light and hard
+    generateMatches('light');
+    generateMatches('hard');
+
+    // Update displays
+    updateGroupsDisplay('light');
+    updateGroupsDisplay('hard');
+    updateMatchesDisplay('light');
+    updateMatchesDisplay('hard');
+    updateStandings('light');
+    updateStandings('hard');
+
+    // Save to local storage
+    saveToLocalStorage();
 }
 
 function distributeTeamsToGroups(state) {
-let teamIndex = 0;
-for (let i = 0; i < state.activeTeams.length; i++) {
-state.groups[teamIndex].push(state.activeTeams[i]);
-teamIndex = (teamIndex + 1) % state.groups.length;
+    let teamIndex = 0;
+    for (let i = 0; i < state.activeTeams.length; i++) {
+        state.groups[teamIndex].push(state.activeTeams[i]);
+        teamIndex = (teamIndex + 1) % state.groups.length;
+    }
 }
+
+function updateLightHardStandings() {
+    const lightContainer = document.querySelector('.light-standings');
+    const hardContainer = document.querySelector('.hard-standings');
+
+    if (typeof getTeamStandings === 'function') {
+        const standings = getTeamStandings();
+        lightContainer.innerHTML = standings.light.map((team, index) => `
+            <div class="p-2 bg-gray-100 rounded">
+                ${index + 1}. ${team}
+            </div>
+        `).join('');
+        
+        hardContainer.innerHTML = standings.hard.map((team, index) => `
+            <div class="p-2 bg-gray-100 rounded">
+                ${index + 1}. ${team}
+            </div>
+        `).join('');
+    } else {
+        console.error('Function getTeamStandings is not defined');
+    }
+}
+
+function getTeamStandings() {
+    const lightTeams = tournamentStates.light.activeTeams;
+    const hardTeams = tournamentStates.hard.activeTeams;
+    
+    return {
+        light: lightTeams,
+        hard: hardTeams
+    };
+}
+
+function getTeamStandings() {
+    const lightTeams = tournamentStates.light.activeTeams;
+    const hardTeams = tournamentStates.hard.activeTeams;
+    
+    return {
+        light: lightTeams,
+        hard: hardTeams
+    };
+}
+
+function distributeTeamsToGroups(state) {
+    let teamIndex = 0;
+    for (let i = 0; i < state.activeTeams.length; i++) {
+    state.groups[teamIndex].push(state.activeTeams[i]);
+    teamIndex = (teamIndex + 1) % state.groups.length;
+    }
 }
 
 // Add these new functions at the top of your script section
@@ -763,386 +791,393 @@ function removeTeam(type, teamName) {
 }
 
 function updateTeamsList(type) {
-const mainTab = document.getElementById(`${type}-main-tab`);
-const container = mainTab.querySelector('.teams-list');
+    const mainTab = document.getElementById(`${type}-main-tab`);
+    if (!mainTab) {
+        console.warn(`Main tab for ${type} not found`);
+        return;
+    }
 
-container.innerHTML = tournamentStates[type].activeTeams.map(team => `
-    <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
-        <span class="flex-grow">${team}</span>
-        <button 
-            onclick="removeTeam('${type}', '${team}')" 
-            class="text-red-500 hover:text-red-700 px-2"
-        >
-            ×
-        </button>
-    </div>
-`).join('');
+    const container = mainTab.querySelector('.teams-list');
+    if (!container) {
+        console.warn(`Teams list container for ${type} not found`);
+        return;
+    }
+    
+    container.innerHTML = tournamentStates[type].activeTeams.map(team => `
+        <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+            <span class="flex-grow">${team}</span>
+            <button 
+                onclick="removeTeam('${type}', '${team}')" 
+                class="text-red-500 hover:text-red-700 px-2"
+            >×</button>
+        </div>
+    `).join('');
 }
 
 function generateRandomScores(type) {
-const state = tournamentStates[type];
-state.matches.forEach(match => {
-    while (true) {
-        const score1 = Math.floor(Math.random() * 22);
-        const score2 = Math.floor(Math.random() * 22);
+    const state = tournamentStates[type];
+    state.matches.forEach(match => {
+        while (true) {
+            const score1 = Math.floor(Math.random() * 22);
+            const score2 = Math.floor(Math.random() * 22);
 
-        if ((score1 === 21 && score1 - score2 >= 2) || 
-            (score2 === 21 && score2 - score1 >= 2)) {
-            match.score1 = score1;
-            match.score2 = score2;
-            break;
-        }
-    }
-});
-
-updateMatchesDisplay(type);
-updateStandings(type);
-saveToLocalStorage();
-}
-
-function generateMatches(type) {
-if (!type || !tournamentStates[type]) return;
-
-const state = tournamentStates[type];
-const numCourts = type === 'all' ? 6 : 3;
-state.matches = [];
-const matchesPerGroup = 6;
-const matchDuration = 20;
-
-state.groups.forEach((group, courtIndex) => {
-    if (group.length >= 2) {
-        for (let i = 0; i < group.length; i++) {
-            for (let j = i + 1; j < group.length; j++) {
-                state.matches.push({
-                    court: courtIndex + 1,
-                    team1: group[i],
-                    team2: group[j],
-                    score1: 0,
-                    score2: 0,
-                    startTime: new Date()
-                });
+            if ((score1 === 21 && score1 - score2 >= 2) || 
+                (score2 === 21 && score2 - score1 >= 2)) {
+                match.score1 = score1;
+                match.score2 = score2;
+                break;
             }
         }
+    });
+
+    updateMatchesDisplay(type);
+    updateStandings(type);
+    saveToLocalStorage();
     }
-});
 
-const startTime = new Date();
-startTime.setHours(9, 0, 0, 0);
+function generateMatches(type) {
+    if (!type || !tournamentStates[type]) return;
 
-for (let matchIndex = 0; matchIndex < matchesPerGroup; matchIndex++) {
-    const matchTime = new Date(startTime);
-    matchTime.setMinutes(matchTime.getMinutes() + (matchIndex * matchDuration));
+    const state = tournamentStates[type];
+    const numCourts = type === 'all' ? 6 : 3;
+    state.matches = [];
+    const matchesPerGroup = 6;
+    const matchDuration = 20;
 
-    state.groups.forEach((_, courtIndex) => {
-        const courtMatches = state.matches.filter(m => m.court === courtIndex + 1);
-        if (matchIndex < courtMatches.length) {
-            courtMatches[matchIndex].startTime = new Date(matchTime);
+    state.groups.forEach((group, courtIndex) => {
+        if (group.length >= 2) {
+            for (let i = 0; i < group.length; i++) {
+                for (let j = i + 1; j < group.length; j++) {
+                    state.matches.push({
+                        court: courtIndex + 1,
+                        team1: group[i],
+                        team2: group[j],
+                        score1: 0,
+                        score2: 0,
+                        startTime: new Date()
+                    });
+                }
+            }
         }
     });
-}
+
+    const startTime = new Date();
+    startTime.setHours(9, 0, 0, 0);
+
+    for (let matchIndex = 0; matchIndex < matchesPerGroup; matchIndex++) {
+        const matchTime = new Date(startTime);
+        matchTime.setMinutes(matchTime.getMinutes() + (matchIndex * matchDuration));
+
+        state.groups.forEach((_, courtIndex) => {
+            const courtMatches = state.matches.filter(m => m.court === courtIndex + 1);
+            if (matchIndex < courtMatches.length) {
+                courtMatches[matchIndex].startTime = new Date(matchTime);
+            }
+        });
+    }
 }
 
 function updateGroupsDisplay(type) {
-const mainTab = document.getElementById(`${type}-main-tab`);
-const container = mainTab.querySelector('.groups-container');
-const state = tournamentStates[type];
+    const mainTab = document.getElementById(`${type}-main-tab`);
+    const container = mainTab.querySelector('.groups-container');
+    const state = tournamentStates[type];
 
-// Get rankings from 'all' tournament if we're in light or hard tab
-const allRankings = (type === 'light' || type === 'hard') ? 
-    getAllRankings(tournamentStates.all.teamStats) : 
-    null;
+    // Get rankings from 'all' tournament if we're in light or hard tab
+    const allRankings = (type === 'light' || type === 'hard') ? 
+        getAllRankings(tournamentStates.all.teamStats) : 
+        null;
 
-container.innerHTML = state.groups.map((group, groupIndex) => `
-    <div class="border rounded-lg p-4">
-        <h3 class="font-semibold mb-2">Court ${groupIndex + 1}</h3>
-        <ul class="space-y-2">
-            ${group.map(team => `
-                <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <div class="flex items-center gap-2">
-                        <span>${team}</span>
-                        ${allRankings && allRankings[team] ? 
-                            `<span class="text-sm text-gray-600">(All Rank: #${allRankings[team]})</span>` 
-                            : ''}
-                    </div>
-                    <button 
-                        onclick="showSwitchTeamModal('${team}', ${groupIndex})" 
-                        class="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 rounded border border-blue-500 hover:border-blue-700"
-                    >
-                        Switch Group
-                    </button>
-                </li>
-            `).join('')}
-        </ul>
-    </div>
-`).join('');
+    container.innerHTML = state.groups.map((group, groupIndex) => `
+        <div class="border rounded-lg p-4">
+            <h3 class="font-semibold mb-2">Court ${groupIndex + 1}</h3>
+            <ul class="space-y-2">
+                ${group.map(team => `
+                    <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <div class="flex items-center gap-2">
+                            <span>${team}</span>
+                            ${allRankings && allRankings[team] ? 
+                                `<span class="text-sm text-gray-600">(All Rank: #${allRankings[team]})</span>` 
+                                : ''}
+                        </div>
+                        <button 
+                            onclick="showSwitchTeamModal('${team}', ${groupIndex})" 
+                            class="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 rounded border border-blue-500 hover:border-blue-700"
+                        >
+                            Switch Group
+                        </button>
+                    </li>
+                `).join('')}
+            </ul>
+        </div>
+    `).join('');
 }
 
 function formatTime(date) {
-return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function updateMatchesDisplay(type) {
-const mainTab = document.getElementById(`${type}-main-tab`);
-if (!mainTab) return;
+    const mainTab = document.getElementById(`${type}-main-tab`);
+    if (!mainTab) return;
 
-const container = mainTab.querySelector('.matches-container');
-if (!container) return;
+    const container = mainTab.querySelector('.matches-container');
+    if (!container) return;
 
-const state = tournamentStates[type];
-if (!state || !state.groups || !state.matches) return;
+    const state = tournamentStates[type];
+    if (!state || !state.groups || !state.matches) return;
 
-container.innerHTML = state.groups.map((groupTeams, groupIndex) => {
-    const groupMatches = state.matches.filter(
-        match => groupTeams.includes(match.team1) || groupTeams.includes(match.team2)
-    );
-    return `
-        <div class="border rounded-lg p-4">
-            <h3 class="font-semibold mb-2">Court ${groupIndex + 1}</h3>
-            <div class="text-sm text-gray-600 mb-4">
-                <div class="font-medium mb-1">Teams:</div>
-                ${groupTeams.map(team => `
-                    <div class="whitespace-nowrap overflow-hidden text-ellipsis">
-                        ${team}
-                    </div>
-                `).join('')}
-            </div>
-            <div class="space-y-4">
-                ${groupMatches.map((match) => {
-                    const overallMatchIndex = state.matches.findIndex(m => m === match);
-                    return `
-                        <div class="bg-gray-50 p-3 rounded-lg">
-                            <div class="flex justify-between text-sm text-gray-600 mb-2">
-                                <span>Court ${match.court}</span>
-                                <span>${formatTime(match.startTime)}</span>
-                            </div>
-                            <div class="space-y-2">
-                                <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
-                                    <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
-                                        ${match.team1}
-                                    </span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value="${match.score1 ?? 0}"
-                                        onchange="updateScore('${type}', ${overallMatchIndex}, this.value, null)"
-                                        class="text-center w-20 flex-shrink-0 border rounded p-1"
-                                        placeholder="Score"
-                                    >
-                                </div>
-                                <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
-                                    <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
-                                        ${match.team2}
-                                    </span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value="${match.score2 ?? 0}"
-                                        onchange="updateScore('${type}', ${overallMatchIndex}, null, this.value)"
-                                        class="text-center w-20 flex-shrink-0 border rounded p-1"
-                                        placeholder="Score"
-                                    >
-                                </div>
-                            </div>
+    container.innerHTML = state.groups.map((groupTeams, groupIndex) => {
+        const groupMatches = state.matches.filter(
+            match => groupTeams.includes(match.team1) || groupTeams.includes(match.team2)
+        );
+        return `
+            <div class="border rounded-lg p-4">
+                <h3 class="font-semibold mb-2">Court ${groupIndex + 1}</h3>
+                <div class="text-sm text-gray-600 mb-4">
+                    <div class="font-medium mb-1">Teams:</div>
+                    ${groupTeams.map(team => `
+                        <div class="whitespace-nowrap overflow-hidden text-ellipsis">
+                            ${team}
                         </div>
-                    `;
-                }).join('')}
+                    `).join('')}
+                </div>
+                <div class="space-y-4">
+                    ${groupMatches.map((match) => {
+                        const overallMatchIndex = state.matches.findIndex(m => m === match);
+                        return `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                    <span>Court ${match.court}</span>
+                                    <span>${formatTime(match.startTime)}</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                                        <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
+                                            ${match.team1}
+                                        </span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value="${match.score1 ?? 0}"
+                                            onchange="updateScore('${type}', ${overallMatchIndex}, this.value, null)"
+                                            class="text-center w-20 flex-shrink-0 border rounded p-1"
+                                            placeholder="Score"
+                                        >
+                                    </div>
+                                    <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                                        <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
+                                            ${match.team2}
+                                        </span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value="${match.score2 ?? 0}"
+                                            onchange="updateScore('${type}', ${overallMatchIndex}, null, this.value)"
+                                            class="text-center w-20 flex-shrink-0 border rounded p-1"
+                                            placeholder="Score"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
             </div>
-        </div>
-    `;
-}).join('');
+        `;
+    }).join('');
 }
 
 function updateScore(type, matchIndex, score1, score2) {
-const state = tournamentStates[type];
-const match = state.matches[matchIndex];
+    const state = tournamentStates[type];
+    const match = state.matches[matchIndex];
 
-if (!match) return;
+    if (!match) return;
 
-if (score1 !== null) match.score1 = parseInt(score1) || 0;
-if (score2 !== null) match.score2 = parseInt(score2) || 0;
+    if (score1 !== null) match.score1 = parseInt(score1) || 0;
+    if (score2 !== null) match.score2 = parseInt(score2) || 0;
 
-[match.team1, match.team2].forEach(team => {
-    if (!state.teamStats[team]) {
-        state.teamStats[team] = { wins: 0, pointsScored: 0, pointsConceded: 0, differential: 0 };
+    [match.team1, match.team2].forEach(team => {
+        if (!state.teamStats[team]) {
+            state.teamStats[team] = { wins: 0, pointsScored: 0, pointsConceded: 0, differential: 0 };
+        }
+    });
+
+    state.teamStats[match.team1].pointsScored += match.score1;
+    state.teamStats[match.team1].pointsConceded += match.score2;
+    state.teamStats[match.team2].pointsScored += match.score2;
+    state.teamStats[match.team2].pointsConceded += match.score1;
+
+    if (match.score1 > match.score2) {
+        state.teamStats[match.team1].wins += 1;
+    } else if (match.score2 > match.score1) {
+        state.teamStats[match.team2].wins += 1;
     }
-});
 
-state.teamStats[match.team1].pointsScored += match.score1;
-state.teamStats[match.team1].pointsConceded += match.score2;
-state.teamStats[match.team2].pointsScored += match.score2;
-state.teamStats[match.team2].pointsConceded += match.score1;
+    [match.team1, match.team2].forEach(team => {
+        state.teamStats[team].differential = 
+            state.teamStats[team].pointsScored - state.teamStats[team].pointsConceded;
+    });
 
-if (match.score1 > match.score2) {
-    state.teamStats[match.team1].wins += 1;
-} else if (match.score2 > match.score1) {
-    state.teamStats[match.team2].wins += 1;
-}
-
-[match.team1, match.team2].forEach(team => {
-    state.teamStats[team].differential = 
-        state.teamStats[team].pointsScored - state.teamStats[team].pointsConceded;
-});
-
-updateMatchesDisplay(type);
-updateStandings(type);
-saveToLocalStorage();
+    updateMatchesDisplay(type);
+    updateStandings(type);
+    saveToLocalStorage();
 }
 
 function updateStandings(type) {
-const mainTab = document.getElementById(`${type}-main-tab`);
-const winsContainer = mainTab.querySelector('.wins-standings');
-const diffContainer = mainTab.querySelector('.differential-standings');
-const groupsContainer = mainTab.querySelector('.group-standings');
-const state = tournamentStates[type];
+    const mainTab = document.getElementById(`${type}-main-tab`);
+    const winsContainer = mainTab.querySelector('.wins-standings');
+    const diffContainer = mainTab.querySelector('.differential-standings');
+    const groupsContainer = mainTab.querySelector('.group-standings');
+    const state = tournamentStates[type];
 
-// Reset all team stats
-Object.keys(state.teamStats).forEach(team => {
-state.teamStats[team] = {
-   wins: 0,
-   pointsScored: 0,
-   pointsConceded: 0,
-   differential: 0
-};
+    // Reset all team stats
+    Object.keys(state.teamStats).forEach(team => {
+    state.teamStats[team] = {
+    wins: 0,
+    pointsScored: 0,
+    pointsConceded: 0,
+    differential: 0
+    };
 });
 
 // Recalculate all stats
-state.matches.forEach(match => {
-if (match.score1 !== null && match.score2 !== null) {
-   state.teamStats[match.team1].pointsScored += match.score1;
-   state.teamStats[match.team1].pointsConceded += match.score2;
-   state.teamStats[match.team2].pointsScored += match.score2;
-   state.teamStats[match.team2].pointsConceded += match.score1;
+    state.matches.forEach(match => {
+    if (match.score1 !== null && match.score2 !== null) {
+    state.teamStats[match.team1].pointsScored += match.score1;
+    state.teamStats[match.team1].pointsConceded += match.score2;
+    state.teamStats[match.team2].pointsScored += match.score2;
+    state.teamStats[match.team2].pointsConceded += match.score1;
 
-   if (match.score1 > match.score2) {
-       state.teamStats[match.team1].wins += 1;
-   } else if (match.score2 > match.score1) {
-       state.teamStats[match.team2].wins += 1;
-   }
-}
-});
+    if (match.score1 > match.score2) {
+        state.teamStats[match.team1].wins += 1;
+    } else if (match.score2 > match.score1) {
+        state.teamStats[match.team2].wins += 1;
+    }
+    }
+    });
 
-// Calculate differentials
-Object.keys(state.teamStats).forEach(team => {
-state.teamStats[team].differential =
-   state.teamStats[team].pointsScored - state.teamStats[team].pointsConceded;
-});
+    // Calculate differentials
+    Object.keys(state.teamStats).forEach(team => {
+    state.teamStats[team].differential =
+    state.teamStats[team].pointsScored - state.teamStats[team].pointsConceded;
+    });
 
-// Update wins standings
-const winsSorted = Object.entries(state.teamStats)
-.sort(([, a], [, b]) => b.wins - a.wins);
+    // Update wins standings
+    const winsSorted = Object.entries(state.teamStats)
+    .sort(([, a], [, b]) => b.wins - a.wins);
 
-winsContainer.innerHTML = winsSorted.map(([team, stats], index) => `
-<div class="flex justify-between items-center p-2 bg-gray-100 rounded">
-   <span>${index + 1}. ${team}</span>
-   <span class="font-semibold">${stats.wins} wins</span>
-</div>
-`).join('');
+    winsContainer.innerHTML = winsSorted.map(([team, stats], index) => `
+    <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+    <span>${index + 1}. ${team}</span>
+    <span class="font-semibold">${stats.wins} wins</span>
+    </div>
+    `).join('');
 
-// Update differential standings
-const diffSorted = Object.entries(state.teamStats)
-.sort(([, a], [, b]) => b.differential - a.differential);
+    // Update differential standings
+    const diffSorted = Object.entries(state.teamStats)
+    .sort(([, a], [, b]) => b.differential - a.differential);
 
-diffContainer.innerHTML = diffSorted.map(([team, stats], index) => `
-<div class="grid grid-cols-4 items-center p-2 bg-gray-100 rounded gap-2">
-   <span>${index + 1}. ${team}</span>
-   <span class="text-green-600">Scored: ${stats.pointsScored}</span>
-   <span class="text-red-600">Conceded: ${stats.pointsConceded}</span>
-   <span class="font-semibold text-right">
-       Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
-   </span>
-</div>
-`).join('');
+    diffContainer.innerHTML = diffSorted.map(([team, stats], index) => `
+    <div class="grid grid-cols-4 items-center p-2 bg-gray-100 rounded gap-2">
+    <span>${index + 1}. ${team}</span>
+    <span class="text-green-600">Scored: ${stats.pointsScored}</span>
+    <span class="text-red-600">Conceded: ${stats.pointsConceded}</span>
+    <span class="font-semibold text-right">
+        Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
+    </span>
+    </div>
+    `).join('');
 
-// Update group standings
-groupsContainer.innerHTML = state.groups.map((groupTeams, groupIndex) => {
-const groupStats = groupTeams.map(team => ({
-   team,
-   ...state.teamStats[team]
-})).sort((a, b) => b.wins - a.wins || b.differential - a.differential);
+    // Update group standings
+    groupsContainer.innerHTML = state.groups.map((groupTeams, groupIndex) => {
+    const groupStats = groupTeams.map(team => ({
+    team,
+    ...state.teamStats[team]
+    })).sort((a, b) => b.wins - a.wins || b.differential - a.differential);
 
-return `
-   <div class="bg-white rounded-lg p-4 border mb-4">
-       <h3 class="font-semibold mb-2">Group ${groupIndex + 1}</h3>
-       ${groupStats.map((stats, index) => `
-           <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
-               <span>${index + 1}. ${stats.team}</span>
-               <span class="font-semibold">${stats.wins} wins</span>
-               <span class="text-green-600">Scored: ${stats.pointsScored}</span>
-               <span class="text-red-600">Conceded: ${stats.pointsConceded}</span>
-               <span class="font-semibold text-right">
-                   Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
-               </span>
-           </div>
-       `).join('')}
-   </div>
-`;
-}).join('');
+    return `
+    <div class="bg-white rounded-lg p-4 border mb-4">
+        <h3 class="font-semibold mb-2">Group ${groupIndex + 1}</h3>
+        ${groupStats.map((stats, index) => `
+            <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+                <span>${index + 1}. ${stats.team}</span>
+                <span class="font-semibold">${stats.wins} wins</span>
+                <span class="text-green-600">Scored: ${stats.pointsScored}</span>
+                <span class="text-red-600">Conceded: ${stats.pointsConceded}</span>
+                <span class="font-semibold text-right">
+                    Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
+                </span>
+            </div>
+        `).join('')}
+    </div>
+    `;
+    }).join('');
 }
 
 function showSwitchTeamModal(team, currentGroupIndex) {
-selectedTeam = team;
-selectedGroupIndex = currentGroupIndex;
+    selectedTeam = team;
+    selectedGroupIndex = currentGroupIndex;
 
-const modal = document.getElementById('switch-team-modal');
-const teamSpan = document.getElementById('selected-team');
-const groupSelect = document.getElementById('new-group-select');
+    const modal = document.getElementById('switch-team-modal');
+    const teamSpan = document.getElementById('selected-team');
+    const groupSelect = document.getElementById('new-group-select');
 
-teamSpan.textContent = team;
+    teamSpan.textContent = team;
 
-// Populate group options
-groupSelect.innerHTML = groups.map((group, index) => 
-    index !== currentGroupIndex ? 
-    `<option value="${index}">Court ${index + 1}</option>` : 
-    ''
-).join('');
+    // Populate group options
+    groupSelect.innerHTML = groups.map((group, index) => 
+        index !== currentGroupIndex ? 
+        `<option value="${index}">Court ${index + 1}</option>` : 
+        ''
+    ).join('');
 
-modal.classList.remove('hidden');
+    modal.classList.remove('hidden');
 }
 
 function closeSwitchTeamModal() {
-const modal = document.getElementById('switch-team-modal');
-modal.classList.add('hidden');
-selectedTeam = null;
-selectedGroupIndex = null;
+    const modal = document.getElementById('switch-team-modal');
+    modal.classList.add('hidden');
+    selectedTeam = null;
+    selectedGroupIndex = null;
 }
 
 function getAllRankings(teamStats) {
-if (!teamStats) return {};
+    if (!teamStats) return {};
 
-// Sort teams by wins and then point differential
-const sortedTeams = Object.entries(teamStats)
-    .sort(([, a], [, b]) => {
-        if (b.wins !== a.wins) {
-            return b.wins - a.wins;
-        }
-        return b.differential - a.differential;
+    // Sort teams by wins and then point differential
+    const sortedTeams = Object.entries(teamStats)
+        .sort(([, a], [, b]) => {
+            if (b.wins !== a.wins) {
+                return b.wins - a.wins;
+            }
+            return b.differential - a.differential;
+        });
+
+    // Create a ranking map
+    const rankings = {};
+    sortedTeams.forEach(([team], index) => {
+        rankings[team] = index + 1;
     });
 
-// Create a ranking map
-const rankings = {};
-sortedTeams.forEach(([team], index) => {
-    rankings[team] = index + 1;
-});
-
-return rankings;
+    return rankings;
 }
 
 function switchTeamGroup() {
-if (!selectedTeam || !currentTournamentType) return;
+    if (!selectedTeam || !currentTournamentType) return;
 
-const newGroupIndex = parseInt(document.getElementById('new-group-select').value);
-const state = tournamentStates[currentTournamentType];
+    const newGroupIndex = parseInt(document.getElementById('new-group-select').value);
+    const state = tournamentStates[currentTournamentType];
 
-state.groups[selectedGroupIndex] = state.groups[selectedGroupIndex].filter(team => team !== selectedTeam);
-state.groups[newGroupIndex].push(selectedTeam);
+    state.groups[selectedGroupIndex] = state.groups[selectedGroupIndex].filter(team => team !== selectedTeam);
+    state.groups[newGroupIndex].push(selectedTeam);
 
-generateMatches(currentTournamentType);
-updateGroupsDisplay(currentTournamentType);
-updateMatchesDisplay(currentTournamentType);
-updateStandings(currentTournamentType);
-saveToLocalStorage();
+    generateMatches(currentTournamentType);
+    updateGroupsDisplay(currentTournamentType);
+    updateMatchesDisplay(currentTournamentType);
+    updateStandings(currentTournamentType);
+    saveToLocalStorage();
 
-closeSwitchTeamModal();
+    closeSwitchTeamModal();
 }
 
 function loadFromLocalStorage() {
@@ -1179,11 +1214,14 @@ function loadFromLocalStorage() {
                 }
             };
             
-            updateTeamsList(type);
-            updateGroupsDisplay(type);
-            updateMatchesDisplay(type);
-            updateStandings(type);
-            updateBracketDisplay(type);
+            // Defer UI updates to ensure DOM is ready
+            setTimeout(() => {
+                updateTeamsList(type);
+                updateGroupsDisplay(type);
+                updateMatchesDisplay(type);
+                updateStandings(type);
+                updateBracketDisplay(type);
+            }, 0);
         });
         
         return true;
@@ -1194,55 +1232,56 @@ function loadFromLocalStorage() {
 }
 
 function saveToLocalStorage() {
-const dataToSave = {};
-Object.entries(tournamentStates).forEach(([type, state]) => {
-dataToSave[type] = {
-    ...state,
-    matches: state.matches.map(match => ({
-        ...match,
-        startTime: match.startTime.toISOString()
-    }))
-};
-});
+    const dataToSave = {};
+    Object.entries(tournamentStates).forEach(([type, state]) => {
+    dataToSave[type] = {
+        ...state,
+        matches: state.matches.map(match => ({
+            ...match,
+            startTime: match.startTime.toISOString()
+        }))
+    };
+    });
 
-localStorage.setItem('volleyballTournament', JSON.stringify(dataToSave));
+    localStorage.setItem('volleyballTournament', JSON.stringify(dataToSave));
 }
 
 function clearTournamentData(type) {
-tournamentStates[type] = {
-    activeTeams: [],
-    groups: Array(type === 'all' ? 6 : 3).fill().map(() => []),
-    matches: [],
-    teamStats: {},
-    isFirstGeneration: true
-};
+    tournamentStates[type] = {
+        activeTeams: [],
+        groups: Array(type === 'all' ? 6 : 3).fill().map(() => []),
+        matches: [],
+        teamStats: {},
+        isFirstGeneration: true
+    };
 
-updateTeamsList(type);
-updateGroupsDisplay(type);
-updateMatchesDisplay(type);
-updateStandings(type);
-saveToLocalStorage();
+    updateTeamsList(type);
+    updateGroupsDisplay(type);
+    updateMatchesDisplay(type);
+    updateStandings(type);
+    saveToLocalStorage();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-initializeTournamentSections();
-const loaded = loadFromLocalStorage();
-if (!loaded) {
-    Object.keys(tournamentStates).forEach(type => {
-        toggleTournament(type);
-    });
-}
-const splitButton = document.getElementById('split-teams-button');
-if (splitButton) {
-    splitButton.addEventListener('click', function() {
-        if (typeof splitIntoLightAndHard === 'function') {
-            splitIntoLightAndHard();
-            updateLightHardStandings();
-        } else {
-            console.error('Function splitIntoLightAndHard is not defined');
-        }
-    });
-} else {
-    console.error('Button split-teams-button not found');
-}
+    initializeTournamentSections();
+    const loaded = loadFromLocalStorage();
+    if (!loaded) {
+        Object.keys(tournamentStates).forEach(type => {
+            toggleTournament(type);
+        });
+    }
+
+    const splitButton = document.getElementById('split-teams-button');
+    if (splitButton) {
+        splitButton.addEventListener('click', function() {
+            if (typeof splitIntoLightAndHard === 'function') {
+                splitIntoLightAndHard();
+                updateLightHardStandings();
+            } else {
+                console.error('Function splitIntoLightAndHard is not defined');
+            }
+        });
+    } else {
+        console.error('Button split-teams-button not found');
+    }
 });
