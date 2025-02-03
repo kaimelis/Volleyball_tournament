@@ -66,6 +66,59 @@
                     </div>
                 </div>
     
+                <template id="tournament-section-template-simplified">
+                    <div class="border-b">
+                        <div class="flex gap-4 px-4">
+                            <button class="tab-button active-tab" data-action="manage">Manage</button>
+                            <button class="tab-button" data-action="bracket">Bracket</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Manage Content -->
+                    <div class="tab-content active p-4" data-content="manage">
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-bold">Tournament Groups</h2>
+                                <button 
+                                    class="text-blue-500 hover:text-blue-700 px-4 py-2 rounded border border-blue-500 hover:border-blue-700 toggle-team-management"
+                                >
+                                    Show Team Management
+                                </button>
+                            </div>
+                
+                            <div class="team-management-section hidden space-y-4">
+                                <div>
+                                    <h3 class="font-semibold mb-2">Actions</h3>
+                                    <div class="flex space-x-2">
+                                        <button class="random-scores-button flex-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                            Generate Random Scores
+                                        </button>
+                                        <button class="clear-button flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                                            Delete Tournament
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div class="groups-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Groups will be inserted here -->
+                        </div>
+                    </div>
+                
+                    <!-- Bracket Content -->
+                    <div class="tab-content" data-content="bracket">
+                        <div class="p-4">
+                            <h2 class="text-xl font-bold mb-4">Double Elimination Bracket</h2>
+                            <button class="generate-bracket-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">
+                                Generate Bracket
+                            </button>
+                            <div class="winners-bracket bracket-container"></div>
+                            <div class="losers-bracket bracket-container"></div>
+                        </div>
+                    </div>
+                </template>
+
                 <!-- Template for tournament sections -->
                 <template id="tournament-section-template">
                     <div class="border-b">
@@ -73,7 +126,6 @@
                             <button class="tab-button active-tab" data-action="manage">Manage</button>
                             <button class="tab-button" data-action="matches">Matches</button>
                             <button class="tab-button" data-action="standings">Standings</button>
-                            <button class="tab-button" data-action="bracket">Bracket</button>
                         </div>
                     </div>
                     
@@ -292,17 +344,51 @@ const tournamentStates = {
         let selectedGroupIndex = null;
 
     function initializeTournamentSections() {
-            const template = document.getElementById('tournament-section-template');
-            ['all', 'light', 'hard'].forEach(type => {
-                const container = document.getElementById(`${type}-main-tab`);
-                container.innerHTML = template.innerHTML;
+        const fullTemplate = document.getElementById('tournament-section-template');
+        const simplifiedTemplate = document.getElementById('tournament-section-template-simplified');
+        
+        // Initialize 'all' section with full template
+        const allContainer = document.getElementById('all-main-tab');
+        allContainer.innerHTML = fullTemplate.innerHTML;
+        setupEventListeners(allContainer, 'all');
 
-                // Add event listeners for this section
-                setupEventListeners(container, type);
+        // Initialize light and hard sections with simplified template
+        ['light', 'hard'].forEach(type => {
+            const container = document.getElementById(`${type}-main-tab`);
+            container.innerHTML = simplifiedTemplate.innerHTML;
+            setupSimplifiedEventListeners(container, type);
+        });
+    }
+
+    function setupSimplifiedEventListeners(container, type) {
+        // Tab navigation
+        container.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.action;
+                showSubTab(type, action);
             });
-        }
+        });
 
-        function setupEventListeners(container, type) {
+        // Team management toggle
+        container.querySelector('.toggle-team-management').addEventListener('click', () => {
+            toggleTeamManagement(type);
+        });
+
+        // Action buttons
+        container.querySelector('.random-scores-button').addEventListener('click', () => {
+            generateRandomScores(type);
+        });
+
+        container.querySelector('.clear-button').addEventListener('click', () => {
+            clearTournamentData(type);
+        });
+
+        container.querySelector('.generate-bracket-button').addEventListener('click', () => {
+            generateBracket(type);
+        });
+    }
+
+    function setupEventListeners(container, type) {
             // Tab navigation
             container.querySelectorAll('.tab-button').forEach(button => {
                 button.addEventListener('click', () => {
@@ -350,48 +436,70 @@ const tournamentStates = {
         }
 
     function splitIntoLightAndHard() {
-    const allTeams = tournamentStates.all.activeTeams;
-    const allStats = tournamentStates.all.teamStats;
-    
-    // Sort teams based on wins and then point differential
-    const sortedTeams = allTeams.sort((a, b) => {
-        if (allStats[b].wins !== allStats[a].wins) {
-            return allStats[b].wins - allStats[a].wins;
+        const allTeams = tournamentStates.all.activeTeams;
+        const allStats = tournamentStates.all.teamStats;
+        
+        // Sort teams based on wins and then point differential
+        const sortedTeams = allTeams.sort((a, b) => {
+            if (allStats[b].wins !== allStats[a].wins) {
+                return allStats[b].wins - allStats[a].wins;
+            }
+            return allStats[b].differential - allStats[a].differential;
+        });
+
+        const midpoint = Math.ceil(sortedTeams.length / 2);
+        const hardTeams = sortedTeams.slice(0, midpoint);
+        const lightTeams = sortedTeams.slice(midpoint);
+
+        // Update light and hard states
+        tournamentStates.light.activeTeams = lightTeams;
+        tournamentStates.hard.activeTeams = hardTeams;
+
+        // Reset groups for light and hard
+        tournamentStates.light.groups = [[], [], []];
+        tournamentStates.hard.groups = [[], [], []];
+
+        // Distribute teams to groups
+        distributeTeamsToGroups(tournamentStates.light);
+        distributeTeamsToGroups(tournamentStates.hard);
+
+        // Generate new matches for light and hard
+        generateMatches('light');
+        generateMatches('hard');
+
+        // Update displays
+        updateGroupsDisplay('light');
+        updateGroupsDisplay('hard');
+        updateMatchesDisplay('light');
+        updateMatchesDisplay('hard');
+        updateStandings('light');
+        updateStandings('hard');
+
+        // Save to local storage
+        saveToLocalStorage();
+    }
+
+    function updateLightHardStandings() {
+        const lightContainer = document.querySelector('.light-standings');
+        const hardContainer = document.querySelector('.hard-standings');
+        
+        if (typeof getTeamStandings === 'function') {
+            const standings = getTeamStandings();
+            lightContainer.innerHTML = standings.light.map((team, index) => `
+                <div class="p-2 bg-gray-100 rounded">
+                    ${index + 1}. ${team}
+                </div>
+            `).join('');
+            
+            hardContainer.innerHTML = standings.hard.map((team, index) => `
+                <div class="p-2 bg-gray-100 rounded">
+                    ${index + 1}. ${team}
+                </div>
+            `).join('');
+        } else {
+            console.error('Function getTeamStandings is not defined');
         }
-        return allStats[b].differential - allStats[a].differential;
-    });
-
-    const midpoint = Math.ceil(sortedTeams.length / 2);
-    const hardTeams = sortedTeams.slice(0, midpoint);
-    const lightTeams = sortedTeams.slice(midpoint);
-
-    // Update light and hard states
-    tournamentStates.light.activeTeams = lightTeams;
-    tournamentStates.hard.activeTeams = hardTeams;
-
-    // Reset groups for light and hard
-    tournamentStates.light.groups = [[], [], []];
-    tournamentStates.hard.groups = [[], [], []];
-
-    // Distribute teams to groups
-    distributeTeamsToGroups(tournamentStates.light);
-    distributeTeamsToGroups(tournamentStates.hard);
-
-    // Generate new matches for light and hard
-    generateMatches('light');
-    generateMatches('hard');
-
-    // Update displays
-    updateGroupsDisplay('light');
-    updateGroupsDisplay('hard');
-    updateMatchesDisplay('light');
-    updateMatchesDisplay('hard');
-    updateStandings('light');
-    updateStandings('hard');
-
-    // Save to local storage
-    saveToLocalStorage();
-}
+    }
 
 function distributeTeamsToGroups(state) {
     let teamIndex = 0;
@@ -962,13 +1070,25 @@ function distributeTeamsToGroups(state) {
     function updateGroupsDisplay(type) {
         const mainTab = document.getElementById(`${type}-main-tab`);
         const container = mainTab.querySelector('.groups-container');
-        container.innerHTML = tournamentStates[type].groups.map((group, groupIndex) => `
+        const state = tournamentStates[type];
+        
+        // Get rankings from 'all' tournament if we're in light or hard tab
+        const allRankings = (type === 'light' || type === 'hard') ? 
+            getAllRankings(tournamentStates.all.teamStats) : 
+            null;
+
+        container.innerHTML = state.groups.map((group, groupIndex) => `
             <div class="border rounded-lg p-4">
                 <h3 class="font-semibold mb-2">Court ${groupIndex + 1}</h3>
                 <ul class="space-y-2">
                     ${group.map(team => `
                         <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                            <span>${team}</span>
+                            <div class="flex items-center gap-2">
+                                <span>${team}</span>
+                                ${allRankings && allRankings[team] ? 
+                                    `<span class="text-sm text-gray-600">(All Rank: #${allRankings[team]})</span>` 
+                                    : ''}
+                            </div>
                             <button 
                                 onclick="showSwitchTeamModal('${team}', ${groupIndex})" 
                                 class="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 rounded border border-blue-500 hover:border-blue-700"
@@ -1211,6 +1331,27 @@ function distributeTeamsToGroups(state) {
         selectedGroupIndex = null;
     }
 
+    function getAllRankings(teamStats) {
+        if (!teamStats) return {};
+        
+        // Sort teams by wins and then point differential
+        const sortedTeams = Object.entries(teamStats)
+            .sort(([, a], [, b]) => {
+                if (b.wins !== a.wins) {
+                    return b.wins - a.wins;
+                }
+                return b.differential - a.differential;
+            });
+
+        // Create a ranking map
+        const rankings = {};
+        sortedTeams.forEach(([team], index) => {
+            rankings[team] = index + 1;
+        });
+        
+        return rankings;
+    }
+
     function switchTeamGroup() {
         if (!selectedTeam || !currentTournamentType) return;
         
@@ -1309,14 +1450,27 @@ function distributeTeamsToGroups(state) {
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-    initializeTournamentSections();
-    const loaded = loadFromLocalStorage();
-    if (!loaded) {
-        Object.keys(tournamentStates).forEach(type => {
-            toggleTournament(type);
-        });
-    }
-});
+        initializeTournamentSections();
+        const loaded = loadFromLocalStorage();
+        if (!loaded) {
+            Object.keys(tournamentStates).forEach(type => {
+                toggleTournament(type);
+            });
+        }
+        const splitButton = document.getElementById('split-teams-button');
+        if (splitButton) {
+            splitButton.addEventListener('click', function() {
+                if (typeof splitIntoLightAndHard === 'function') {
+                    splitIntoLightAndHard();
+                    updateLightHardStandings();
+                } else {
+                    console.error('Function splitIntoLightAndHard is not defined');
+                }
+            });
+        } else {
+            console.error('Button split-teams-button not found');
+        }
+    });
     </script>
 </body>
 </html>

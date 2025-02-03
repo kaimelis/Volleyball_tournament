@@ -1,0 +1,52 @@
+.tab-content {
+    display: none;
+ }
+ 
+ .tab-content.active {
+    display: block;
+ }
+ 
+ .tab-button {
+    padding: 10px 20px;
+    cursor: pointer;
+ }
+ 
+ .active-tab {
+    border-bottom: 2px solid blue;
+    font-weight: bold;
+ }
+ 
+ .main-tab-content {
+    display: none;
+ }
+ 
+ .main-tab-content.active {
+    display: block;
+ }
+ 
+ .bracket-round {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 200px;
+ }
+ 
+ .bracket-match {
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background: white;
+ }
+ 
+ .bracket-container {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    padding: 1rem;
+ }
+ 
+ .losers-bracket {
+    margin-top: 2rem;
+    border-top: 2px dashed #ddd;
+    padding-top: 1rem;
+ }
