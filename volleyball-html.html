@@ -26,6 +26,32 @@
             .main-tab-content.active {
                 display: block;
             }
+            .bracket-round {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                min-width: 200px;
+            }
+            
+            .bracket-match {
+                border: 1px solid #ddd;
+                padding: 0.5rem;
+                border-radius: 0.25rem;
+                background: white;
+            }
+
+            .bracket-container {
+                display: flex;
+                gap: 2rem;
+                overflow-x: auto;
+                padding: 1rem;
+            }
+
+            .losers-bracket {
+                margin-top: 2rem;
+                border-top: 2px dashed #ddd;
+                padding-top: 1rem;
+            }
         </style>
     </head>
     <body class="bg-gray-50">
@@ -47,6 +73,7 @@
                             <button class="tab-button active-tab" data-action="manage">Manage</button>
                             <button class="tab-button" data-action="matches">Matches</button>
                             <button class="tab-button" data-action="standings">Standings</button>
+                            <button class="tab-button" data-action="bracket">Bracket</button>
                         </div>
                     </div>
                     
@@ -85,25 +112,25 @@
                                         <!-- Teams will be listed here -->
                                     </div>
                                 </div>
-                            </div>
-    
-                            <div>
-                                <h3 class="font-semibold mb-2">Demo</h3>
-                                <div class="flex space-x-2">
-                                    <button class="generate-button flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                        Generate Groups & Schedule
-                                    </button>
-                                    <button class="random-scores-button flex-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                                        Generate Random Scores
-                                    </button>
-                                    <button class="clear-button flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                                        Delete Tournament
+
+                                <div>
+                                    <h3 class="font-semibold mb-2">Demo</h3>
+                                    <div class="flex space-x-2">
+                                        <button class="generate-button flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                            Generate Groups & Schedule
+                                        </button>
+                                        <button class="random-scores-button flex-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                            Generate Random Scores
+                                        </button>
+                                        <button class="clear-button flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                                            Delete Tournament
+                                        </button>
+                                    </div>
+                                    <h3 class="font-semibold mt-4 mb-2">Configuration</h3>
+                                    <button class="reshuffle-button w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                                        Reshuffle Teams
                                     </button>
                                 </div>
-                                <h3 class="font-semibold mt-4 mb-2">Configuration</h3>
-                                <button class="reshuffle-button w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                                    Reshuffle Teams
-                                </button>
                             </div>
                         </div>
     
@@ -122,6 +149,9 @@
                     <!-- Standings Content -->
                     <div class="tab-content p-4" data-content="standings">
                         <div class="space-y-6">
+                            <button id="split-teams-button" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                                Move Top Teams to Hard & Others to Light
+                            </button>
                             <div class="bg-white rounded-lg p-4 border">
                                 <h3 class="text-lg font-semibold mb-4">Tournament Standings (Wins)</h3>
                                 <div class="wins-standings space-y-2">
@@ -142,6 +172,17 @@
                                     <!-- Group standings will be inserted here -->
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" data-content="bracket">
+                        <div class="p-4">
+                            <h2 class="text-xl font-bold mb-4">Double Elimination Bracket</h2>
+                            <button class="generate-bracket-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">
+                                Generate Bracket
+                            </button>
+                            <div class="winners-bracket bracket-container"></div>
+                            <div class="losers-bracket bracket-container"></div>
                         </div>
                     </div>
                 </template>
@@ -182,11 +223,15 @@
 
     <script>
 
-        const tournamentStates = {
+const tournamentStates = {
             all: {
                 activeTeams: [],
                 groups: Array(6).fill().map(() => []),
                 matches: [],
+                bracketMatches: {
+                    winners: [],
+                    losers: []
+                },
                 teamStats: {},
                 isFirstGeneration: true
             },
@@ -194,6 +239,10 @@
                 activeTeams: [],
                 groups: Array(3).fill().map(() => []),
                 matches: [],
+                bracketMatches: {
+                    winners: [],
+                    losers: []
+                },
                 teamStats: {},
                 isFirstGeneration: true
             },
@@ -201,6 +250,10 @@
                 activeTeams: [],
                 groups: Array(3).fill().map(() => []),
                 matches: [],
+                bracketMatches: {
+                    winners: [],
+                    losers: []
+                },
                 teamStats: {},
                 isFirstGeneration: true
             }
@@ -291,8 +344,62 @@
                     addTeam(type);
                 }
             });
+            container.querySelector('.generate-bracket-button').addEventListener('click', () => {
+                generateBracket(type);
+            });
         }
 
+    function splitIntoLightAndHard() {
+    const allTeams = tournamentStates.all.activeTeams;
+    const allStats = tournamentStates.all.teamStats;
+    
+    // Sort teams based on wins and then point differential
+    const sortedTeams = allTeams.sort((a, b) => {
+        if (allStats[b].wins !== allStats[a].wins) {
+            return allStats[b].wins - allStats[a].wins;
+        }
+        return allStats[b].differential - allStats[a].differential;
+    });
+
+    const midpoint = Math.ceil(sortedTeams.length / 2);
+    const hardTeams = sortedTeams.slice(0, midpoint);
+    const lightTeams = sortedTeams.slice(midpoint);
+
+    // Update light and hard states
+    tournamentStates.light.activeTeams = lightTeams;
+    tournamentStates.hard.activeTeams = hardTeams;
+
+    // Reset groups for light and hard
+    tournamentStates.light.groups = [[], [], []];
+    tournamentStates.hard.groups = [[], [], []];
+
+    // Distribute teams to groups
+    distributeTeamsToGroups(tournamentStates.light);
+    distributeTeamsToGroups(tournamentStates.hard);
+
+    // Generate new matches for light and hard
+    generateMatches('light');
+    generateMatches('hard');
+
+    // Update displays
+    updateGroupsDisplay('light');
+    updateGroupsDisplay('hard');
+    updateMatchesDisplay('light');
+    updateMatchesDisplay('hard');
+    updateStandings('light');
+    updateStandings('hard');
+
+    // Save to local storage
+    saveToLocalStorage();
+}
+
+function distributeTeamsToGroups(state) {
+    let teamIndex = 0;
+    for (let i = 0; i < state.activeTeams.length; i++) {
+        state.groups[teamIndex].push(state.activeTeams[i]);
+        teamIndex = (teamIndex + 1) % state.groups.length;
+    }
+}
 
     // Add these new functions at the top of your script section
     function showMainTab(type) {
@@ -376,6 +483,264 @@
             }
         }
 
+        function generateBracket(type) {
+            const state = tournamentStates[type];
+            const teams = [...state.activeTeams];
+            
+            // Reset bracket matches
+            state.bracketMatches = {
+                winners: [],
+                losers: []
+            };
+
+            // Generate winners bracket first round
+            const numTeams = teams.length;
+            const firstRoundMatches = Math.pow(2, Math.ceil(Math.log2(numTeams)));
+            const byes = firstRoundMatches - numTeams;
+
+            // Shuffle teams
+            for (let i = teams.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [teams[i], teams[j]] = [teams[j], teams[i]];
+            }
+
+            // Create first round matches with byes
+            const firstRound = [];
+            for (let i = 0; i < firstRoundMatches / 2; i++) {
+                if (i < byes / 2) {
+                    firstRound.push({
+                        team1: teams[i],
+                        team2: "BYE",
+                        score1: null,
+                        score2: null,
+                        round: 1,
+                        matchNumber: i + 1
+                    });
+                } else {
+                    firstRound.push({
+                        team1: teams[i],
+                        team2: teams[teams.length - (i - Math.floor(byes/2)) - 1] || "BYE",
+                        score1: null,
+                        score2: null,
+                        round: 1,
+                        matchNumber: i + 1
+                    });
+                }
+            }
+
+            state.bracketMatches.winners = firstRound;
+            updateBracketDisplay(type);
+            saveToLocalStorage();
+        }
+
+        function updateBracketScore(type, bracket, matchIndex, score1, score2) {
+            const state = tournamentStates[type];
+            const match = state.bracketMatches[bracket][matchIndex];
+
+            if (!match) return;
+
+            if (score1 !== null) match.score1 = parseInt(score1) || 0;
+            if (score2 !== null) match.score2 = parseInt(score2) || 0;
+
+            // Only process completed matches
+            if (match.score1 !== null && match.score2 !== null) {
+                const winner = match.score1 > match.score2 ? match.team1 : match.team2;
+                const loser = match.score1 > match.score2 ? match.team2 : match.team1;
+
+                if (bracket === 'winners') {
+                    // Handle winners bracket progression
+                    const nextRoundMatch = Math.floor((match.matchNumber - 1) / 2) + 1;
+                    const isFirstTeam = match.matchNumber % 2 === 1;
+
+                    let nextMatch = state.bracketMatches.winners.find(m => 
+                        m.round === match.round + 1 && m.matchNumber === nextRoundMatch
+                    );
+
+                    if (!nextMatch) {
+                        nextMatch = {
+                            round: match.round + 1,
+                            matchNumber: nextRoundMatch,
+                            team1: isFirstTeam ? winner : null,
+                            team2: isFirstTeam ? null : winner,
+                            score1: null,
+                            score2: null
+                        };
+                        state.bracketMatches.winners.push(nextMatch);
+                    } else {
+                        if (isFirstTeam) {
+                            nextMatch.team1 = winner;
+                        } else {
+                            nextMatch.team2 = winner;
+                        }
+                    }
+
+                    // Add loser to losers bracket if not BYE
+                    if (loser !== 'BYE') {
+                        const loserBracketRound = match.round;
+                        const loserMatchNumber = state.bracketMatches.losers.length + 1;
+                        
+                        // Find or create the appropriate losers bracket match
+                        let loserMatch = state.bracketMatches.losers.find(m => 
+                            m.round === loserBracketRound && 
+                            (!m.team1 || !m.team2)
+                        );
+
+                        if (!loserMatch) {
+                            loserMatch = {
+                                round: loserBracketRound,
+                                matchNumber: loserMatchNumber,
+                                team1: loser,
+                                team2: null,
+                                score1: null,
+                                score2: null
+                            };
+                            state.bracketMatches.losers.push(loserMatch);
+                        } else {
+                            if (!loserMatch.team1) {
+                                loserMatch.team1 = loser;
+                            } else {
+                                loserMatch.team2 = loser;
+                            }
+                        }
+                    }
+                } else if (bracket === 'losers') {
+                    // Handle losers bracket progression
+                    const nextRoundMatch = Math.floor((match.matchNumber - 1) / 2) + 1;
+                    let nextMatch = state.bracketMatches.losers.find(m => 
+                        m.round === match.round + 1 && m.matchNumber === nextRoundMatch
+                    );
+
+                    if (!nextMatch && winner !== 'BYE') {
+                        nextMatch = {
+                            round: match.round + 1,
+                            matchNumber: nextRoundMatch,
+                            team1: winner,
+                            team2: null,
+                            score1: null,
+                            score2: null
+                        };
+                        state.bracketMatches.losers.push(nextMatch);
+                    } else if (nextMatch && winner !== 'BYE') {
+                        if (!nextMatch.team1) {
+                            nextMatch.team1 = winner;
+                        } else {
+                            nextMatch.team2 = winner;
+                        }
+                    }
+                }
+            }
+
+            updateBracketDisplay(type);
+            saveToLocalStorage();
+        }
+
+        function updateBracketDisplay(type) {
+            const mainTab = document.getElementById(`${type}-main-tab`);
+            const winnersContainer = mainTab.querySelector('.winners-bracket');
+            const losersContainer = mainTab.querySelector('.losers-bracket');
+            const state = tournamentStates[type];
+
+            // Group matches by round
+            const winnerRounds = {};
+            state.bracketMatches.winners.forEach(match => {
+                if (!winnerRounds[match.round]) {
+                    winnerRounds[match.round] = [];
+                }
+                winnerRounds[match.round].push(match);
+            });
+
+            const loserRounds = {};
+            state.bracketMatches.losers.forEach(match => {
+                if (!loserRounds[match.round]) {
+                    loserRounds[match.round] = [];
+                }
+                loserRounds[match.round].push(match);
+            });
+
+            // Generate winners bracket HTML
+            winnersContainer.innerHTML = `
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-4 text-lg">Winners Bracket</h3>
+                    <div class="flex gap-8">
+                        ${Object.entries(winnerRounds)
+                            .map(([round, matches]) => `
+                                <div class="bracket-round">
+                                    <h4 class="font-semibold mb-2">Round ${round}</h4>
+                                    ${matches.map((match, idx) => `
+                                        <div class="bracket-match mb-4 ${match.winner ? 'border-green-500' : ''}">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm text-gray-600">Match ${match.matchNumber}</span>
+                                            </div>
+                                            <div class="space-y-2">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="flex-grow">${match.team1}</span>
+                                                    <input
+                                                        type="number"
+                                                        value="${match.score1 ?? ''}"
+                                                        onchange="updateBracketScore('${type}', 'winners', ${match.matchNumber-1}, this.value, null)"
+                                                        class="w-16 text-center border rounded p-1"
+                                                        ${match.team1 === 'BYE' ? 'disabled' : ''}
+                                                    >
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="flex-grow">${match.team2}</span>
+                                                    <input
+                                                        type="number"
+                                                        value="${match.score2 ?? ''}"
+                                                        onchange="updateBracketScore('${type}', 'winners', ${match.matchNumber-1}, null, this.value)"
+                                                        class="w-16 text-center border rounded p-1"
+                                                        ${match.team2 === 'BYE' ? 'disabled' : ''}
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `).join('')}
+                    </div>
+                </div>`;
+
+            // Generate losers bracket HTML
+            losersContainer.innerHTML = `
+                <div>
+                    <h3 class="font-semibold mb-4 text-lg">Losers Bracket</h3>
+                    <div class="flex gap-8">
+                        ${Object.entries(loserRounds)
+                            .map(([round, matches]) => `
+                                <div class="bracket-round">
+                                    <h4 class="font-semibold mb-2">Round ${round}</h4>
+                                    ${matches.map((match, idx) => `
+                                        <div class="bracket-match mb-4 ${match.winner ? 'border-green-500' : ''}">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm text-gray-600">Match ${match.matchNumber}</span>
+                                            </div>
+                                            <div class="space-y-2">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="flex-grow">${match.team1}</span>
+                                                    <input
+                                                        type="number"
+                                                        value="${match.score1 ?? ''}"
+                                                        onchange="updateBracketScore('${type}', 'losers', ${match.matchNumber-1}, this.value, null)"
+                                                        class="w-16 text-center border rounded p-1"
+                                                    >
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="flex-grow">${match.team2}</span>
+                                                    <input
+                                                        type="number"
+                                                        value="${match.score2 ?? ''}"
+                                                        onchange="updateBracketScore('${type}', 'losers', ${match.matchNumber-1}, null, this.value)"
+                                                        class="w-16 text-center border rounded p-1"
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `).join('')}
+                    </div>
+                </div>`;
+        }
 
     function generateGroups(type) {
         const state = tournamentStates[type];
@@ -405,30 +770,47 @@
     }
 
     function toggleTournament(type) {
-        const state = tournamentStates[type];
-        
-        if (state.isFirstGeneration) {
-            state.activeTeams = [...defaultTeams[type]];
-            state.isFirstGeneration = false;
-        }
+    const state = tournamentStates[type];
+    
+    if (state.isFirstGeneration) {
+        state.activeTeams = [...defaultTeams[type]];
+        state.isFirstGeneration = false;
+    }
 
-        state.teamStats = {};
-        state.activeTeams.forEach(team => {
-            state.teamStats[team] = {
-                wins: 0,
-                pointsScored: 0,
-                pointsConceded: 0,
-                differential: 0
+    state.teamStats = {};
+    state.activeTeams.forEach(team => {
+        state.teamStats[team] = {
+            wins: 0,
+            pointsScored: 0,
+            pointsConceded: 0,
+            differential: 0
+        };
+    });
+
+    generateGroups(type);
+    updateTeamsList(type);
+    updateGroupsDisplay(type);
+    updateMatchesDisplay(type);
+    updateStandings(type);
+
+    // Reset light and hard divisions when starting a new 'all' tournament
+    if (type === 'all') {
+        ['light', 'hard'].forEach(divType => {
+            tournamentStates[divType] = {
+                activeTeams: [],
+                groups: [[], [], []],
+                matches: [],
+                teamStats: {},
+                isFirstGeneration: true
             };
+            updateGroupsDisplay(divType);
+            updateMatchesDisplay(divType);
+            updateStandings(divType);
         });
+    }
 
-        generateGroups(type);
-        updateTeamsList(type);
-        updateGroupsDisplay(type);
-        updateMatchesDisplay(type);
-        updateStandings(type);
-        saveToLocalStorage();
-        }
+    saveToLocalStorage();
+}
 
     function addTeam(type) {
         const mainTab = document.getElementById(`${type}-main-tab`);
@@ -459,6 +841,7 @@
             };
         });
     }
+    
     function reshuffleTeams(type) {
         const state = tournamentStates[type];
         const numCourts = type === 'all' ? 6 : 3;
@@ -487,7 +870,6 @@
         updateStandings(type);
         saveToLocalStorage();
     }
-
 
     function removeTeam(type, teamName) {
             tournamentStates[type].activeTeams = tournamentStates[type].activeTeams.filter(team => team !== teamName);
@@ -576,7 +958,6 @@
             });
         }
         }
-
 
     function updateGroupsDisplay(type) {
         const mainTab = document.getElementById(`${type}-main-tab`);
@@ -711,7 +1092,6 @@
         updateStandings(type);
         saveToLocalStorage();
     }
-
 
     function updateStandings(type) {
    const mainTab = document.getElementById(`${type}-main-tab`);
@@ -850,47 +1230,54 @@
     }
     
     function loadFromLocalStorage() {
-        const savedData = localStorage.getItem('volleyballTournament');
-        if (!savedData) return false;
-        
-        try {
-            const loadedData = JSON.parse(savedData);
+            const savedData = localStorage.getItem('volleyballTournament');
+            if (!savedData) return false;
             
-            // Initialize default state if data is missing
-            ['all', 'light', 'hard'].forEach(type => {
-                if (!loadedData[type]) {
-                    loadedData[type] = {
-                        activeTeams: [],
-                        groups: Array(type === 'all' ? 6 : 3).fill().map(() => []),
-                        matches: [],
-                        teamStats: {},
-                        isFirstGeneration: true
-                    };
-                }
-
-                tournamentStates[type] = {
-                    ...loadedData[type],
-                    matches: (loadedData[type].matches || []).map(match => ({
-                        ...match,
-                        startTime: new Date(match.startTime),
-                        score1: match.score1 ?? 0,
-                        score2: match.score2 ?? 0
-                    }))
-                };
+            try {
+                const loadedData = JSON.parse(savedData);
                 
-                updateTeamsList(type);
-                updateGroupsDisplay(type);
-                updateMatchesDisplay(type);
-                updateStandings(type);
-            });
-            
-            return true;
-        } catch (error) {
-            console.error('Error loading saved data:', error);
-            return false;
+                ['all', 'light', 'hard'].forEach(type => {
+                    if (!loadedData[type]) {
+                        loadedData[type] = {
+                            activeTeams: [],
+                            groups: Array(type === 'all' ? 6 : 3).fill().map(() => []),
+                            matches: [],
+                            bracketMatches: {
+                                winners: [],
+                                losers: []
+                            },
+                            teamStats: {},
+                            isFirstGeneration: true
+                        };
+                    }
+
+                    tournamentStates[type] = {
+                        ...loadedData[type],
+                        matches: (loadedData[type].matches || []).map(match => ({
+                            ...match,
+                            startTime: new Date(match.startTime)
+                        })),
+                        bracketMatches: loadedData[type].bracketMatches || {
+                            winners: [],
+                            losers: []
+                        }
+                    };
+                    
+                    updateTeamsList(type);
+                    updateGroupsDisplay(type);
+                    updateMatchesDisplay(type);
+                    updateStandings(type);
+                    updateBracketDisplay(type);
+                });
+                
+                return true;
+            } catch (error) {
+                console.error('Error loading saved data:', error);
+                return false;
+            }
         }
-        }
-    function saveToLocalStorage() {
+    
+        function saveToLocalStorage() {
     const dataToSave = {};
     Object.entries(tournamentStates).forEach(([type, state]) => {
         dataToSave[type] = {
@@ -904,7 +1291,6 @@
     
     localStorage.setItem('volleyballTournament', JSON.stringify(dataToSave));
 }
-
 
     function clearTournamentData(type) {
         tournamentStates[type] = {

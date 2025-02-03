@@ -7,7 +7,7 @@
   <style>
     :root {
       --primary-color: #2980b9;
-      --secondary-color: #faf1c8;
+      --secondary-color: #34495e;
       --background-color: #f4f4f4;
       --border-color: #ddd;
       --text-color: #2c3e50;
@@ -109,13 +109,30 @@
     .match-cell {
       position: relative;
       min-height: 40px;
-      padding: 12px 8px;
-      cursor: text;
+      padding: 12px 24px 12px 8px;
     }
-    
-    .match-cell[contenteditable="true"]:focus {
-      outline: 2px solid var(--primary-color);
-      background-color: #fff;
+
+    .match-cell .close-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+      text-align: center;
+      border-radius: 50%;
+      background-color: #e0e0e0;
+      color: #666;
+      cursor: pointer;
+      font-size: 12px;
+      border: none;
+      padding: 0;
+      transition: all 0.2s ease;
+    }
+
+    .match-cell .close-btn:hover {
+      background-color: #ff4444;
+      color: white;
     }
 
     .occupied-court {
@@ -142,31 +159,6 @@
       border-radius: 3px;
     }
 
-    /* Row Control Buttons */
-    .row-controls {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .row-control-btn {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 4px 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .row-control-btn:hover {
-      opacity: 0.9;
-    }
-
-    .row-control-btn.remove {
-      background-color: #e74c3c;
-    }
-
     /* Tournament Info Styles */
     .tournament-info {
       margin: 20px 0;
@@ -185,6 +177,71 @@
       white-space: pre-line;
       padding: 10px;
       line-height: 1.5;
+    }
+    .match-cell {
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .match-editor {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      min-width: 300px;
+      display: none;
+    }
+
+    .match-editor.active {
+      display: block;
+    }
+
+    .match-editor select, 
+    .match-editor input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .match-editor button {
+      padding: 8px 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .match-editor .save-btn {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .match-editor .cancel-btn {
+      background: #f44336;
+      color: white;
+    }
+
+    .bracket-type {
+      font-weight: bold;
+      color: #666;
+    }
+
+    .teams-list {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 1000;
     }
   </style>
 </head>
@@ -387,9 +444,7 @@
   </div>
   <div class="stage-header">
     <h2>Match Schedule - 12 Team Double Elimination</h2>
-    <div style="text-align: right; padding: 10px;">
-      <button class="row-control-btn" onclick="window.tournamentManager.addNewRound()">Add Round</button>
-    </div>
+    <p>Click on any match to edit teams and bracket type</p>
   </div>
   
   <table class="table">
@@ -407,84 +462,77 @@
       <tr class="time-slot">
         <td>Round 1</td>
         <td class="match-time">11:00 AM</td>
-        <td class="match-cell" data-match="1">Match 1 [WB]: Team 8 vs Team 9</td>
-        <td class="match-cell" data-match="2">Match 2 [WB]: Team 12 vs Team 5</td>
-        <td class="match-cell" data-match="3">Match 3 [WB]: Team 10 vs Team 7</td>
+        <td class="match-cell" data-match="1">Match 1 [WB]: Mix Masters vs Wave Alliance</td>
+        <td class="match-cell" data-match="2">Match 2 [WB]: Sand Fusion vs Beach United</td>
+        <td class="match-cell" data-match="3">Match 3 [WB]: Dual Force vs Team Synergy</td>
       </tr>
       
       <tr class="time-slot">
         <td>Round 2</td>
         <td class="match-time">11:20 AM</td>
-        <td class="match-cell" data-match="4">Match 4 [WB]: Team 11 vs Team 6</td>
-        <td class="match-cell" data-match="5">Match 5 [WB]: Team 1 vs Winner M1</td>
-        <td class="match-cell" data-match="6">Match 6 [WB]: Team 4 vs Winner M2</td>
+        <td class="match-cell" data-match="4">Match 4 [WB]: Beach Kings vs Coastal Elite</td>
+        <td class="match-cell" data-match="5">Match 9 [LB]: Loser M1 vs Loser M2</td>
+        <td class="match-cell" data-match="6">Match 10 [LB]: Loser M3 vs Loser M4</td>
       </tr>
 
       <!-- Second Round -->
       <tr class="time-slot">
         <td>Round 3</td>
         <td class="match-time">11:40 AM</td>
-        <td class="match-cell" data-match="7">Match 7 [WB]: Team 2 vs Winner M3</td>
-        <td class="match-cell"data-match="8">Match 8 [WB]: Team 3 vs Winner  M4</td>
-        <td class="match-cell" data-match="9">Match 9 [LB]: Looser M1 vs Loser M8</td>
+        <td class="match-cell" data-match="7">Match 5 [WB]: Winner M1 vs Winner M2</td>
+        <td class="match-cell"data-match="8">Match 6 [WB]: Winner M3 vs Winner M4</td>
+        <td class="match-cell" data-match="9">Match 11 [LB]: Net Ninjas vs Loser M5</td>
       </tr>
 
       <tr class="time-slot">
         <td>Round 4</td>
         <td class="match-time">12:00 PM</td>
-        <td class="match-cell" data-match="10">Match 10 [LB]: Looser M2 vs Loser M7</td>
-        <td class="match-cell" data-match="11">Match 11 [LB]: Looser M3 vs Looser M6</td>
-        <td class="match-cell" data-match="12">Match 12 [LB]: Looser M5 vs Looser M4</td>
+        <td class="match-cell" data-match="10">Match 7 [WB]: Net Balance vs Winner M5</td>
+        <td class="match-cell" data-match="11">Match 8 [WB]: Coast Combo vs Winner M6</td>
+        <td class="match-cell" data-match="12">Match 12 [LB]: Power Pairs vs Loser M6</td>
       </tr>
 
       <!-- Third Round -->
       <tr class="time-slot">
         <td>Round 5</td>
         <td class="match-time">12:20 PM</td>
-        <td class="match-cell" data-match="13">Match 13 [LB]: Winner M9 vs Winner M10</td>
-        <td class="match-cell" data-match="14">Match 14 [LB]: Winner M11 vs Winner M12</td>
-        <td class="match-cell" data-match="15">Match 15 [WB]: Winner M5 vs Winner M6</td>
+        <td class="match-cell" data-match="13">Match 13 [WB]: Winner M7 vs Winner M8</td>
+        <td class="match-cell" data-match="14">Match 15 [LB]: Winner M9 vs Winner M10</td>
+        <td class="match-cell" data-match="15">Match 16 [LB]: Winner M11 vs Winner M12</td>
       </tr>
 
       <!-- Fourth Round -->
       <tr class="time-slot">
         <td>Round 6</td>
         <td class="match-time">12:40 PM</td>
-        <td class="match-cell" data-match="16">Match 16 [WB]: Winner M7 vs Winner M8</td>
-        <td class="match-cell" data-match="17">Match 17 [LB]: Winner M14 vs Loser M15</td>
-        <td class="match-cell" data-match="18"></td>
+        <td class="match-cell" data-match="16">Match 14 [WB]: Winner M13 vs Power Pairs</td>
+        <td class="match-cell" data-match="17">Match 17 [LB]: Winner M15 vs Loser M13</td>
+        <td class="match-cell" data-match="18">Match 18 [LB]: Winner M16 vs Loser M14</td>
       </tr>
 
       <!-- Fifth Round -->
       <tr class="time-slot">
         <td>Round 7</td>
         <td class="match-time">1:00 PM</td>
-        <td class="match-cell" data-match="19">Match 18 [LB]: Winner M13 vs Loser M16</td>
-        <td class="match-cell" data-match="20">Match 20 [WB]: Winner M15 vs Winner M16</td>
-        <td class="match-cell" data-match="21"></td>
+        <td class="match-cell" data-match="19">Match 19 [WB Final]: Winner M14 vs Net Ninjas</td>
+        <td class="match-cell" data-match="20">Match 20 [LB]: Winner M17 vs Winner M18</td>
+        <td class="match-cell" data-match="21">Match 21 [LB Final]: Winner M20 vs Loser M19</td>
       </tr>
 
       <!-- Finals -->
       <tr class="time-slot">
-        <td>Round 8</td>
+        <td>Finals</td>
         <td class="match-time">1:20 PM</td>
-        <td class="match-cell" data-match="22">Match 19 [LB]: Winner M17 vs Winner M18</td>
+        <td class="match-cell" data-match="22">Match 22 [Finals]: Winner M19 vs Winner M21</td>
         <td class="match-cell" data-match="23"></td>
         <td class="match-cell"data-match="24" ></td>
       </tr>
 
       <!-- If Needed -->
       <tr class="time-slot">
-        <td>Finals Loosers</td>
+        <td>Finals*</td>
         <td class="match-time">1:40 PM</td>
-        <td class="match-cell" data-match="25">Match 21 [LB]: Winner M19 vs Looser M20</td>
-        <td class="match-cell" data-match="26"></td>
-        <td class="match-cell" data-match="27"></td>
-      </tr>
-      <tr class="time-slot">
-        <td>Finals</td>
-        <td class="match-time">1:40 PM</td>
-        <td class="match-cell" data-match="25">Match 22 [WB]: Winner M20 vs Winner M21</td>
+        <td class="match-cell" data-match="25">Match 23 [Finals*]: Rematch if Winner M21 won M22</td>
         <td class="match-cell" data-match="26"></td>
         <td class="match-cell" data-match="27"></td>
       </tr>
@@ -501,9 +549,6 @@
 <div id="light-division" class="tab-content">
   <div class="stage-header">
     <h2>Light Division - Double Elimination Bracket</h2>
-    <div style="text-align: right; padding: 10px;">
-      <button class="row-control-btn" onclick="window.tournamentManager.addNewRound('light')">Add Round</button>
-    </div>
   </div>
   
   <table class="table">
@@ -532,109 +577,69 @@
 </div>
   </div>
 
+    <!-- Match Editor Template -->
+    <div class="match-editor" id="matchEditor">
+      <h3>Edit Match <span id="matchNumber"></span></h3>
+      <select id="bracketType">
+        <option value="WB">Winners Bracket [WB]</option>
+        <option value="LB">Losers Bracket [LB]</option>
+      </select>
+      <select id="team1">
+        <!-- Teams will be populated by JavaScript -->
+      </select>
+      <select id="team2">
+        <!-- Teams will be populated by JavaScript -->
+      </select>
+      <button class="save-btn" onclick="saveMatchChanges()">Save</button>
+      <button class="cancel-btn" onclick="closeMatchEditor()">Cancel</button>
+    </div>
+
   <script>
     class TournamentManager {
       constructor() {
+        this.currentMatch = null;
         this.init();
       }
 
       init() {
+        this.addEventListeners();
         this.updateTimes();
-        this.makeMatchCellsEditable();
+        this.addRemoveButtons();
+        this.populateTeamSelects();
       }
 
-      addNewRound(division) {
-        const divisionId = division === 'light' ? 'light-division' : 'hard-division';
-        const table = document.querySelector(`#${divisionId} .table tbody`);
-        const roundCount = table.querySelectorAll('tr').length;
-        const newRow = document.createElement('tr');
-        newRow.className = 'time-slot';
-        
-        // Create round number cell with remove button
-        const roundCell = document.createElement('td');
-        roundCell.innerHTML = `
-          <div class="row-controls">
-            <span>Round ${roundCount + 1}</span>
-            <button class="row-control-btn remove" onclick="window.tournamentManager.removeRound(this)">×</button>
-          </div>
-        `;
-        
-        // Create time cell
-        const timeCell = document.createElement('td');
-        timeCell.className = 'match-time';
-        timeCell.textContent = '12:00 PM'; // Default time, will be updated
-        
-        // Create match cells
-        const matchCells = Array(3).fill(null).map(() => {
-          const cell = document.createElement('td');
-          cell.className = 'match-cell';
-          cell.setAttribute('contenteditable', 'true');
-          return cell;
-        });
-        
-        // Append all cells
-        newRow.appendChild(roundCell);
-        newRow.appendChild(timeCell);
-        matchCells.forEach(cell => newRow.appendChild(cell));
-        
-        // Add to table
-        table.appendChild(newRow);
-        
-        // Update times and make cells editable
-        this.updateTimes();
-        this.makeMatchCellsEditable();
-      }
-
-      removeRound(button) {
-        const row = button.closest('tr');
-        const table = row.closest('tbody');
-        const division = row.closest('.tab-content').id;
-        
-        if (confirm('Are you sure you want to remove this round?')) {
-          row.remove();
-          this.updateRoundNumbers(division);
-          this.updateTimes();
-        }
-      }
-
-      updateRoundNumbers(division) {
-        const divisionSelector = division ? `#${division}` : '#hard-division';
-        const rows = document.querySelectorAll(`${divisionSelector} .table tbody tr`);
-        rows.forEach((row, index) => {
-          const roundSpan = row.querySelector('.row-controls span');
-          if (roundSpan) {
-            roundSpan.textContent = `Round ${index + 1}`;
-          }
-        });
-      }
-
-      makeMatchCellsEditable() {
-        // Make match cells editable
+      addEventListeners() {
+        document.getElementById('startTime').addEventListener('change', () => this.updateTimes());
         document.querySelectorAll('.match-cell').forEach(cell => {
-          this.makeEditable(cell);
+          cell.addEventListener('click', (e) => this.openMatchEditor(e.target));
         });
 
-        // Make team cells in group stage editable
-        document.querySelectorAll('.groups-container .table td').forEach(cell => {
-          this.makeEditable(cell);
+        // Close editor when clicking outside
+        document.addEventListener('click', (e) => {
+          const editor = document.getElementById('matchEditor');
+          const cell = e.target.closest('.match-cell');
+          if (!editor.contains(e.target) && !cell) {
+            this.closeMatchEditor();
+          }
         });
       }
 
-      makeEditable(cell) {
-        cell.setAttribute('contenteditable', 'true');
-        
-        // Add blur event to save changes
-        cell.addEventListener('blur', () => {
-          this.updateTimes();
-        });
-
-        // Prevent enter key from creating new lines
-        cell.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            cell.blur();
+      addRemoveButtons() {
+        document.querySelectorAll('.match-cell').forEach(cell => {
+          if (cell.textContent.trim() !== '' && !cell.querySelector('.close-btn')) {
+            const closeButton = document.createElement('button');
+            closeButton.textContent = '×';
+            closeButton.className = 'close-btn';
+            closeButton.onclick = () => this.removeGame(closeButton);
+            cell.appendChild(closeButton);
           }
         });
+      }
+
+      removeGame(button) {
+        const cell = button.parentElement;
+        cell.innerHTML = '';
+        this.updateTimes();
       }
 
       updateTimes() {
@@ -663,6 +668,66 @@
           slot.querySelector('.match-time').textContent = timeString;
         });
       }
+    
+      populateTeamSelects() {
+        const teams = Array.from(document.getElementById('availableTeams').children)
+          .map(div => div.textContent);
+        
+        const selects = ['team1', 'team2'];
+        selects.forEach(selectId => {
+          const select = document.getElementById(selectId);
+          select.innerHTML = '<option value="">Select Team</option>';
+          teams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team;
+            option.textContent = team;
+            select.appendChild(option);
+          });
+        });
+      }
+
+      openMatchEditor(cell) {
+        const editor = document.getElementById('matchEditor');
+        const matchNumber = cell.dataset.match;
+        const content = cell.textContent;
+        
+        // Parse current match content
+        const bracketMatch = content.match(/\[(WB|LB)\]/);
+        const bracketType = bracketMatch ? bracketMatch[1] : 'WB';
+        const teamsMatch = content.match(/:\s*([^vs]+)\s+vs\s+(.+)$/);
+        const team1 = teamsMatch ? teamsMatch[1].trim() : '';
+        const team2 = teamsMatch ? teamsMatch[2].trim() : '';
+
+        // Set values in editor
+        document.getElementById('matchNumber').textContent = matchNumber;
+        document.getElementById('bracketType').value = bracketType;
+        document.getElementById('team1').value = team1;
+        document.getElementById('team2').value = team2;
+
+        // Position and show editor
+        editor.style.display = 'block';
+        this.currentMatch = cell;
+      }
+
+      closeMatchEditor() {
+        document.getElementById('matchEditor').style.display = 'none';
+        this.currentMatch = null;
+      }
+
+      saveMatchChanges() {
+        if (!this.currentMatch) return;
+
+        const matchNum = this.currentMatch.dataset.match;
+        const bracketType = document.getElementById('bracketType').value;
+        const team1 = document.getElementById('team1').value;
+        const team2 = document.getElementById('team2').value;
+
+        if (team1 && team2) {
+          this.currentMatch.textContent = `Match ${matchNum} [${bracketType}]: ${team1} vs ${team2}`;
+        }
+
+        this.closeMatchEditor();
+      }
     }
 
     function switchTab(tabId) {
@@ -677,8 +742,17 @@
       new TournamentManager();
     });
 
-    // Initialize tournament manager
+    function saveMatchChanges() {
+      window.tournamentManager.saveMatchChanges();
+    }
+
+    function closeMatchEditor() {
+      window.tournamentManager.closeMatchEditor();
+    }
+
+    // Store the instance globally
     window.tournamentManager = new TournamentManager();
+
   </script>
 </body>
 </html>

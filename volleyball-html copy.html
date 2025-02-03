@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Double Elimination Tournament Bracket with Courts and Times</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .bracket {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .round {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: left;
+    }
+    .match {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    .match .team {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #000;
+      border-radius: 4px;
+      background-color: #f4f4f4;
+    }
+    .court {
+      margin-left: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+    .time {
+      font-weight: bold;
+      margin-left: 10px;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="bracket">
+    <div class="round">
+      <h3>Upper Bracket: Round 1</h3>
+      <div class="match">
+        <div class="team">Match 1: Team 1 vs Team 2 <span class="court">(Court 1)</span><span class="time">9:00 AM - 9:20 AM</span></div>
+      </div>
+      <div class="match">
+        <div class="team">Match 2: Team 3 vs Team 4 <span class="court">(Court 2)</span><span class="time">9:00 AM - 9:20 AM</span></div>
+      </div>
+      <div class="match">
+        <div class="team">Match 3: Team 5 vs Team 6 <span class="court">(Court 3)</span><span class="time">9:00 AM - 9:20 AM</span></div>
+      </div>
+      <div class="match">
+        <div class="team">Match 4: Team 7 vs Team 8 <span class="court">(Court 1)</span><span class="time">9:20 AM - 9:40 AM</span></div>
+      </div>
+    </div>
+    
+    <div class="round">
+      <h3>Upper Bracket: Round 2 (Semifinals)</h3>
+      <div class="match">
+        <div class="team">Semifinal 1: Winner of Match 1 vs Winner of Match 2 <span class="court">(Court 2)</span><span class="time">9:40 AM - 10:00 AM</span></div>
+      </div>
+      <div class="match">
+        <div class="team">Semifinal 2: Winner of Match 3 vs Winner of Match 4 <span class="court">(Court 3)</span><span class="time">9:40 AM - 10:00 AM</span></div>
+      </div>
+    </div>
+
+    <div class="round">
+      <h3>Upper Bracket: Final</h3>
+      <div class="match">
+        <div class="team">Upper Bracket Final: Winner of Semifinal 1 vs Winner of Semifinal 2 <span class="court">(Court 1)</span><span class="time">10:00 AM - 10:20 AM</span></div>
+      </div>
+    </div>
+
+    <div class="round">
+      <h3>Lower Bracket: Round 1</h3>
+      <div class="match">
+        <div class="team">Round 1: Loser of Match 1 vs Loser of Match 2 <span class="court">(Court 2)</span><span class="time">10:20 AM - 10:40 AM</span></div>
+      </div>
+      <div class="match">
+        <div class="team">Round 1: Loser of Match 3 vs Loser of Match 4 <span class="court">(Court 3)</span><span class="time">10:20 AM - 10:40 AM</span></div>
+      </div>
+    </div>
+
+    <div class="round">
+      <h3>Lower Bracket: Round 2</h3>
+      <div class="match">
+        <div class="team">Round 2: Loser of Semifinal 1 vs Winner of Round 1 (Match 1) <span class="court">(Court 1)</span><span class="time">10:40 AM - 11:00 AM</span></div>
+      </div>
+      <div class="match">
+        <div class="team">Round 2: Loser of Semifinal 2 vs Winner of Round 1 (Match 2) <span class="court">(Court 2)</span><span class="time">10:40 AM - 11:00 AM</span></div>
+      </div>
+    </div>
+
+    <div class="round">
+      <h3>Lower Bracket: Final</h3>
+      <div class="match">
+        <div class="team">Lower Bracket Final: Winner of Round 2 (Match 1) vs Winner of Round 2 (Match 2) <span class="court">(Court 3)</span><span class="time">11:00 AM - 11:20 AM</span></div>
+      </div>
+    </div>
+
+    <div class="round">
+      <h3>Finals</h3>
+      <div class="match">
+        <div class="team">Grand Final: Winner of Upper Bracket Final vs Winner of Lower Bracket Final <span class="court">(Court 1)</span><span class="time">11:20 AM - 11:40 AM</span></div>
+      </div>
+      <div class="match">
+        <div class="team">Bronze Match: Loser of Lower Bracket Final vs Loser of Round 2 (Match 2) <span class="court">(Court 2)</span><span class="time">11:20 AM - 11:40 AM</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
