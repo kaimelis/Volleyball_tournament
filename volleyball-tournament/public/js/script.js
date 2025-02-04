@@ -493,10 +493,13 @@ function generateGroups(type) {
     updateStandings(type);
 }
 
-function getMatchHtml(type, match, overallMatchIndex, groupTeams) {
+function getMatchHtml(type, match, overallMatchIndex, availableTeams) {
+    const state = tournamentStates[type];
+    if (!state) return '';
+
     return `
-        <div class="bg-gray-50 p-3 rounded-lg relative">
-            <div class="flex justify-between text-sm text-gray-600 mb-2">
+        <div class="bg-gray-50 p-3 rounded-lg relative shadow">
+            <div class="flex justify-between items-center text-sm text-gray-600 mb-2">
                 <span>Court ${match.court}</span>
                 <input 
                     type="time" 
@@ -505,14 +508,14 @@ function getMatchHtml(type, match, overallMatchIndex, groupTeams) {
                     class="border rounded p-1 text-sm"
                 >
             </div>
-            <div class="space-y-2">
-                <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+            <div class="space-y-3">
+                <div class="flex items-center gap-2">
                     <select
-                        class="flex-grow text-sm font-medium overflow-hidden text-ellipsis border rounded p-1"
+                        class="flex-grow text-sm font-medium border rounded p-1"
                         onchange="updateMatchTeams('${type}', ${overallMatchIndex}, this.value, '${match.team2}')"
                     >
                         <option value="" ${!match.team1 ? 'selected' : ''}>Select team</option>
-                        ${groupTeams.map(team => `
+                        ${availableTeams.map(team => `
                             <option value="${team}" ${team === match.team1 ? 'selected' : ''}>
                                 ${team}
                             </option>
@@ -523,17 +526,17 @@ function getMatchHtml(type, match, overallMatchIndex, groupTeams) {
                         min="0"
                         value="${match.score1}"
                         onchange="updateScore('${type}', ${overallMatchIndex}, this.value, null)"
-                        class="text-center w-20 flex-shrink-0 border rounded p-1"
+                        class="text-center w-20 border rounded p-1"
                         placeholder="Score"
                     >
                 </div>
-                <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                <div class="flex items-center gap-2">
                     <select
-                        class="flex-grow text-sm font-medium overflow-hidden text-ellipsis border rounded p-1"
+                        class="flex-grow text-sm font-medium border rounded p-1"
                         onchange="updateMatchTeams('${type}', ${overallMatchIndex}, '${match.team1}', this.value)"
                     >
                         <option value="" ${!match.team2 ? 'selected' : ''}>Select team</option>
-                        ${groupTeams.map(team => `
+                        ${availableTeams.map(team => `
                             <option value="${team}" ${team === match.team2 ? 'selected' : ''}>
                                 ${team}
                             </option>
@@ -544,16 +547,23 @@ function getMatchHtml(type, match, overallMatchIndex, groupTeams) {
                         min="0"
                         value="${match.score2}"
                         onchange="updateScore('${type}', ${overallMatchIndex}, null, this.value)"
-                        class="text-center w-20 flex-shrink-0 border rounded p-1"
+                        class="text-center w-20 border rounded p-1"
                         placeholder="Score"
                     >
                 </div>
-                <div class="flex justify-end mt-2">
+                <input
+                    type="text"
+                    value="${match.comment || ''}"
+                    onchange="updateMatchComment('${type}', ${overallMatchIndex}, this.value)"
+                    class="w-full border rounded p-1 text-sm"
+                    placeholder="Add a comment (optional)"
+                >
+                <div class="flex justify-end space-x-2 mt-2">
                     <button
                         onclick="setMatchUnplayed('${type}', ${overallMatchIndex})"
-                        class="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded mr-2"
+                        class="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
                     >
-                        Set as Unplayed
+                        Reset Match
                     </button>
                     <button
                         onclick="removeMatch('${type}', ${overallMatchIndex})"
@@ -888,31 +898,67 @@ function generateRandomScores(type) {
                 </div>
             `).join('');
         } else {
-            // For 'light' and 'hard', display single group with previous rankings
             const allRankings = getAllRankings(tournamentStates.all.teamStats);
             container.innerHTML = `
-                <div class="border rounded-lg p-4 col-span-full">
-                    <h3 class="font-semibold mb-2">${type.charAt(0).toUpperCase() + type.slice(1)} Division Teams</h3>
-                    <ul class="space-y-2">
-                        ${state.activeTeams.map(team => {
-                            const previousRank = allRankings[team];
-                            const stats = tournamentStates.all.teamStats[team];
-                            return `
-                                <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                    <div class="flex items-center gap-4">
-                                        <span class="font-medium">${team}</span>
-                                        <span class="text-sm text-gray-600">
-                                            (Previous rank: #${previousRank}, ${stats.wins} wins, Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential})
-                                        </span>
-                                    </div>
-                                </li>
-                            `;
-                        }).join('')}
-                    </ul>
-                </div>
+            <div class="border rounded-lg p-4 col-span-full">
+                <h3 class="font-semibold mb-2">${type.charAt(0).toUpperCase() + type.slice(1)} Division Teams</h3>
+                <ul class="space-y-2 teams-list"> 
+                ${state.activeTeams.map(team => {
+                    const previousRank = allRankings[team];
+                    const stats = tournamentStates.all.teamStats[team];
+                    return `
+                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <div class="flex items-center gap-4">
+                                <span class="font-medium">${team}</span>
+                                <span class="text-sm text-gray-600">
+                                    (Previous rank: #${previousRank}, ${stats.wins} wins, Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential})
+                                </span>
+                                
+                            </div>
+                            <button
+                        onclick="switchTeamDivision('${type}', '${team}')"
+                        class="text-sm bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                    >
+                        Move to ${type === 'light' ? 'Hard' : 'Light'}
+                    </button>
+                        </li>
+                    `;
+                }).join('')}
+                </ul>
+            </div>
             `;
+            
         }
     }
+
+    function switchTeamDivision(fromType, team) {
+        const toType = fromType === 'light' ? 'hard' : 'light';
+        
+        // Remove team from current division
+        tournamentStates[fromType].activeTeams = tournamentStates[fromType].activeTeams.filter(t => t !== team);
+        tournamentStates[fromType].groups[0] = tournamentStates[fromType].groups[0].filter(t => t !== team);
+        
+        // Add team to new division
+        tournamentStates[toType].activeTeams.push(team);
+        tournamentStates[toType].groups[0].push(team);
+        
+        // Move team stats
+        if (tournamentStates[fromType].teamStats[team]) {
+          tournamentStates[toType].teamStats[team] = tournamentStates[fromType].teamStats[team];
+          delete tournamentStates[fromType].teamStats[team];
+        }
+        
+        // Update displays
+        updateGroupsDisplay('light');
+        updateGroupsDisplay('hard');
+        updateMatchesDisplay('light');
+        updateMatchesDisplay('hard');
+        updateStandings('light');
+        updateStandings('hard');
+        
+        // Save to local storage
+        saveToLocalStorage();
+      }
 
 function formatTime(date) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -926,16 +972,47 @@ function updateMatchesDisplay(type) {
     if (!container) return;
     
     const state = tournamentStates[type];
-    if (!state || !state.groups || !state.matches) return;
+    if (!state || !state.matches) return;
 
-    container.innerHTML = `
-        <div class="${type === 'all' ? 'full-screen-matches' : ''}">
-            ${state.groups.map((groupTeams, groupIndex) => {
-                const courtNumber = groupIndex + 1;
-                const groupMatches = state.matches.filter(match => match.court === courtNumber);
-                
-                return `
-                    <div class="court-container">
+    // Different display logic based on tournament type
+    if (type === 'all') {
+        // Keep existing 'all' division logic
+        container.innerHTML = `
+            <div class="full-screen-matches">
+                ${state.groups.map((groupTeams, groupIndex) => {
+                    const courtNumber = groupIndex + 1;
+                    const groupMatches = state.matches.filter(match => match.court === courtNumber);
+                    
+                    return `
+                        <div class="court-container">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-semibold">Court ${courtNumber}</h3>
+                            </div>
+                            <div class="matches-list space-y-4">
+                                ${groupMatches.map((match) => {
+                                    const overallMatchIndex = state.matches.findIndex(m => m === match);
+                                    return getMatchHtml(type, match, overallMatchIndex, groupTeams);
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    } else {
+        // New simplified display for light/hard divisions
+        const courtSections = {};
+        state.matches.forEach(match => {
+            if (!courtSections[match.court]) {
+                courtSections[match.court] = [];
+            }
+            courtSections[match.court].push(match);
+        });
+
+        container.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${[1, 2, 3].map(courtNumber => `
+                    <div class="court-section">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-semibold">Court ${courtNumber}</h3>
                             <button 
@@ -945,23 +1022,96 @@ function updateMatchesDisplay(type) {
                                 Add Match
                             </button>
                         </div>
-                        <div class="text-sm text-gray-600 mb-4">
-                            <div class="font-medium mb-1">Teams in this court:</div>
-                            ${groupTeams.map(team => `
-                                <div class="whitespace-nowrap overflow-hidden text-ellipsis">
-                                    ${team}
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="matches-list space-y-4">
-                            ${groupMatches.map((match) => {
+                        <div class="space-y-4">
+                            ${(courtSections[courtNumber] || []).map((match) => {
                                 const overallMatchIndex = state.matches.findIndex(m => m === match);
-                                return getMatchHtml(type, match, overallMatchIndex, groupTeams);
+                                return getSimplifiedMatchHtml(type, match, overallMatchIndex, state.activeTeams);
                             }).join('')}
                         </div>
                     </div>
-                `;
-            }).join('')}
+                `).join('')}
+            </div>
+        `;
+    }
+}
+
+function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) {
+    return `
+        <div class="bg-gray-50 p-3 rounded-lg relative shadow">
+            <div class="flex justify-between items-center text-sm text-gray-600 mb-2">
+                <span>Match #${overallMatchIndex + 1}</span>
+                <input 
+                    type="time" 
+                    value="${match.startTime.toTimeString().substring(0, 5)}" 
+                    onchange="updateMatchTime('${type}', ${overallMatchIndex}, this.value)"
+                    class="border rounded p-1 text-sm"
+                >
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                    <select
+                        class="flex-grow text-sm font-medium border rounded p-1"
+                        onchange="updateMatchTeams('${type}', ${overallMatchIndex}, this.value, '${match.team2}')"
+                    >
+                        <option value="" ${!match.team1 ? 'selected' : ''}>Select team</option>
+                        ${availableTeams.map(team => `
+                            <option value="${team}" ${team === match.team1 ? 'selected' : ''}>
+                                ${team}
+                            </option>
+                        `).join('')}
+                    </select>
+                    <input
+                        type="number"
+                        min="0"
+                        value="${match.score1}"
+                        onchange="updateScore('${type}', ${overallMatchIndex}, this.value, null)"
+                        class="text-center w-20 border rounded p-1"
+                        placeholder="Score"
+                    >
+                </div>
+                <div class="flex items-center gap-2">
+                    <select
+                        class="flex-grow text-sm font-medium border rounded p-1"
+                        onchange="updateMatchTeams('${type}', ${overallMatchIndex}, '${match.team1}', this.value)"
+                    >
+                        <option value="" ${!match.team2 ? 'selected' : ''}>Select team</option>
+                        ${availableTeams.map(team => `
+                            <option value="${team}" ${team === match.team2 ? 'selected' : ''}>
+                                ${team}
+                            </option>
+                        `).join('')}
+                    </select>
+                    <input
+                        type="number"
+                        min="0"
+                        value="${match.score2}"
+                        onchange="updateScore('${type}', ${overallMatchIndex}, null, this.value)"
+                        class="text-center w-20 border rounded p-1"
+                        placeholder="Score"
+                    >
+                </div>
+                <input
+                    type="text"
+                    value="${match.comment || ''}"
+                    onchange="updateMatchComment('${type}', ${overallMatchIndex}, this.value)"
+                    class="w-full border rounded p-1 text-sm"
+                    placeholder="Add a comment (optional)"
+                >
+                <div class="flex justify-end space-x-2 mt-2">
+                    <button
+                        onclick="setMatchUnplayed('${type}', ${overallMatchIndex})"
+                        class="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+                    >
+                        Reset Match
+                    </button>
+                    <button
+                        onclick="removeMatch('${type}', ${overallMatchIndex})"
+                        class="text-sm bg-red-500 text-white hover:bg-red-600 px-2 py-1 rounded"
+                    >
+                        Remove Match
+                    </button>
+                </div>
+            </div>
         </div>
     `;
 }
@@ -1298,6 +1448,48 @@ function clearTournamentData(type) {
     updateGroupsDisplay(type);
     updateMatchesDisplay(type);
     updateStandings(type);
+    saveToLocalStorage();
+}
+
+function createNewMatch(type, courtNumber) {
+    // Only allow creating new matches for light/hard divisions
+    if (type === 'all') return;
+    
+    const state = tournamentStates[type];
+    const startTime = new Date();
+    startTime.setHours(9, 0, 0, 0);
+
+    // Find the last match in this court to set proper start time
+    const courtMatches = state.matches.filter(m => m.court === courtNumber);
+    if (courtMatches.length > 0) {
+        const lastMatch = courtMatches[courtMatches.length - 1];
+        const newTime = new Date(lastMatch.startTime);
+        newTime.setMinutes(newTime.getMinutes() + 20);
+        startTime.setTime(newTime.getTime());
+    }
+
+    const newMatch = {
+        court: courtNumber,
+        team1: "",
+        team2: "",
+        score1: 0,
+        score2: 0,
+        startTime: startTime,
+        comment: ""
+    };
+
+    state.matches.push(newMatch);
+    updateMatchesDisplay(type);
+    saveToLocalStorage();
+}
+
+
+function updateMatchComment(type, matchIndex, comment) {
+    const state = tournamentStates[type];
+    const match = state.matches[matchIndex];
+    if (!match) return;
+    
+    match.comment = comment;
     saveToLocalStorage();
 }
 

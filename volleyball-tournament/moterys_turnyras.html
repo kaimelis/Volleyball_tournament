@@ -53,7 +53,73 @@
                         </div>
                 
                         <div class="groups-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="border rounded-lg p-4">
+                                <h3 class="font-semibold mb-2">Teams</h3>
+                                <ul class="space-y-2 teams-list">
+                                  <!-- Teams will be listed here -->
+                                </ul>
+                              </div>
                             <!-- Groups will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Manage Content -->
+                    <div class="tab-content active p-4" data-content="manage">
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-bold">Tournament Groups</h2>
+                                <button 
+                                    class="text-blue-500 hover:text-blue-700 px-4 py-2 rounded border border-blue-500 hover:border-blue-700 toggle-team-management"
+                                >
+                                    Show Team Management
+                                </button>
+                            </div>
+
+                            <div class="team-management-section hidden space-y-4">
+                                <!-- existing team management content... -->
+                            </div>
+                        </div>
+
+                        <div class="groups-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Groups will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Matches Content -->
+                    <div class="tab-content p-4" data-content="matches">
+                        <div class="mb-4">
+                            <h2 class="text-xl font-bold">Match Schedule</h2>
+                            <p class="text-gray-600 text-sm mt-1">Add and manage individual matches for each court</p>
+                        </div>
+                        
+                        <!-- Court Selection for New Match -->
+                        <div class="mb-6 bg-white p-4 rounded-lg border">
+                            <h3 class="text-lg font-semibold mb-2">Courts</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <button 
+                                    onclick="createNewMatch(getCurrentTournamentType(), 1)"
+                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                >
+                                    Add Match to Court 1
+                                </button>
+                                <button 
+                                    onclick="createNewMatch(getCurrentTournamentType(), 2)"
+                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                >
+                                    Add Match to Court 2
+                                </button>
+                                <button 
+                                    onclick="createNewMatch(getCurrentTournamentType(), 3)"
+                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                >
+                                    Add Match to Court 3
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Matches Container -->
+                        <div class="matches-container">
+                            <!-- Matches will be inserted here dynamically -->
                         </div>
                     </div>
                 </template>
