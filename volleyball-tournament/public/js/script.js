@@ -86,7 +86,32 @@ setupEventListeners(allContainer, 'all');
 function updateMatchTime(type, matchIndex, newTime) {
     const state = tournamentStates[type];
     if (!state || !state.matches[matchIndex]) return;
-    state.matches[matchIndex].startTime = new Date(`2025-02-01T${newTime}`);
+
+    // Get the court number and match duration
+    const currentMatch = state.matches[matchIndex];
+    const courtNumber = currentMatch.court;
+    const matchDuration = 20; // 20 minutes per match
+
+    // Set the new time for the current match
+    const newStartTime = new Date(`2025-02-01T${newTime}`);
+    currentMatch.startTime = newStartTime;
+
+    // Get and sort all matches in the same court
+    const courtMatches = state.matches
+        .filter(m => m.court === courtNumber)
+        .sort((a, b) => state.matches.indexOf(a) - state.matches.indexOf(b));
+
+    // Find the index of the current match
+    const courtMatchIndex = courtMatches.findIndex(m => m === currentMatch);
+
+    // Update all subsequent matches to be +20 minutes * their distance from the changed match
+    for (let i = courtMatchIndex + 1; i < courtMatches.length; i++) {
+        const minutesToAdd = (i - courtMatchIndex) * matchDuration;
+        const newMatchTime = new Date(newStartTime);
+        newMatchTime.setMinutes(newMatchTime.getMinutes() + minutesToAdd);
+        courtMatches[i].startTime = newMatchTime;
+    }
+
     saveToLocalStorage();
     updateMatchesDisplay(type);
 }
