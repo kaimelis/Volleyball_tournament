@@ -91,32 +91,6 @@
                             <h2 class="text-xl font-bold">Match Schedule</h2>
                             <p class="text-gray-600 text-sm mt-1">Add and manage individual matches for each court</p>
                         </div>
-                        
-                        <!-- Court Selection for New Match -->
-                        <div class="mb-6 bg-white p-4 rounded-lg border">
-                            <h3 class="text-lg font-semibold mb-2">Courts</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <button 
-                                    onclick="createNewMatch(getCurrentTournamentType(), 1)"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                                >
-                                    Add Match to Court 1
-                                </button>
-                                <button 
-                                    onclick="createNewMatch(getCurrentTournamentType(), 2)"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                                >
-                                    Add Match to Court 2
-                                </button>
-                                <button 
-                                    onclick="createNewMatch(getCurrentTournamentType(), 3)"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                                >
-                                    Add Match to Court 3
-                                </button>
-                            </div>
-                        </div>
-
                         <!-- Matches Container -->
                         <div class="matches-container">
                             <!-- Matches will be inserted here dynamically -->
