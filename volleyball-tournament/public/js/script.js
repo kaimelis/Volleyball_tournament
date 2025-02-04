@@ -83,32 +83,40 @@ setupEventListeners(allContainer, 'all');
 });
 }
 
+function updateMatchTime(type, matchIndex, newTime) {
+    const state = tournamentStates[type];
+    if (!state || !state.matches[matchIndex]) return;
+    state.matches[matchIndex].startTime = new Date(`2025-02-01T${newTime}`);
+    saveToLocalStorage();
+    updateMatchesDisplay(type);
+}
+
 function setupSimplifiedEventListeners(container, type) {
-// Tab navigation
-container.querySelectorAll('.tab-button').forEach(button => {
-    button.addEventListener('click', () => {
-        const action = button.dataset.action;
-        showSubTab(type, action);
+    // Tab navigation
+    container.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const action = button.dataset.action;
+            showSubTab(type, action);
+        });
     });
-});
 
-// Team management toggle
-container.querySelector('.toggle-team-management').addEventListener('click', () => {
-    toggleTeamManagement(type);
-});
+    // Team management toggle
+    container.querySelector('.toggle-team-management').addEventListener('click', () => {
+        toggleTeamManagement(type);
+    });
 
-// Action buttons
-container.querySelector('.random-scores-button').addEventListener('click', () => {
-    generateRandomScores(type);
-});
+    // Action buttons
+    container.querySelector('.random-scores-button').addEventListener('click', () => {
+        generateRandomScores(type);
+    });
 
-container.querySelector('.clear-button').addEventListener('click', () => {
-    clearTournamentData(type);
-});
+    container.querySelector('.clear-button').addEventListener('click', () => {
+        clearTournamentData(type);
+    });
 
-container.querySelector('.generate-bracket-button').addEventListener('click', () => {
-    generateBracket(type);
-});
+    container.querySelector('.generate-bracket-button').addEventListener('click', () => {
+        generateBracket(type);
+    });
 }
 
 function setupEventListeners(container, type) {
@@ -242,16 +250,6 @@ function getTeamStandings() {
     };
 }
 
-function getTeamStandings() {
-    const lightTeams = tournamentStates.light.activeTeams;
-    const hardTeams = tournamentStates.hard.activeTeams;
-    
-    return {
-        light: lightTeams,
-        hard: hardTeams
-    };
-}
-
 function distributeTeamsToGroups(state) {
     let teamIndex = 0;
     for (let i = 0; i < state.activeTeams.length; i++) {
@@ -358,26 +356,26 @@ function showSubTab(type, tabName) {
 }
 
 function showTab(tabName) {
-// Hide all tab contents
-document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.classList.remove('active');
-});
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
 
-// Show the selected tab content
-document.getElementById(`${tabName}-tab`).classList.add('active');
+    // Show the selected tab content
+    document.getElementById(`${tabName}-tab`).classList.add('active');
 
-// Remove the active class from all tab buttons
-document.querySelectorAll('.tab-button').forEach(button => {
-    button.classList.remove('active-tab');
-});
+    // Remove the active class from all tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active-tab');
+    });
 
-// Add the active class to the selected tab button
-document.getElementById(`${tabName}-button`).classList.add('active-tab');
+    // Add the active class to the selected tab button
+    document.getElementById(`${tabName}-button`).classList.add('active-tab');
 
-// Update standings if the standings tab is selected
-if (tabName === 'standings') {
-    updateStandings();
-}
+    // Update standings if the standings tab is selected
+    if (tabName === 'standings') {
+        updateStandings();
+    }
 }
 
 function toggleTeamManagement(type) {
@@ -680,47 +678,196 @@ updateMatchesDisplay(type);
 updateStandings(type);
 }
 
-function toggleTournament(type) {
-const state = tournamentStates[type];
-
-if (state.isFirstGeneration) {
-state.activeTeams = [...defaultTeams[type]];
-state.isFirstGeneration = false;
+function getMatchHtml(type, match, overallMatchIndex, groupTeams) {
+    return `
+        <div class="bg-gray-50 p-3 rounded-lg relative">
+            <div class="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Court ${match.court}</span>
+                <input 
+                    type="time" 
+                    value="${match.startTime.toTimeString().substring(0, 5)}" 
+                    onchange="updateMatchTime('${type}', ${overallMatchIndex}, this.value)"
+                    class="border rounded p-1 text-sm"
+                >
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                    <select
+                        class="flex-grow text-sm font-medium overflow-hidden text-ellipsis border rounded p-1"
+                        onchange="updateMatchTeams('${type}', ${overallMatchIndex}, this.value, '${match.team2}')"
+                    >
+                        <option value="" ${match.team1 === "" ? 'selected' : ''}>Select team</option>
+                        ${groupTeams.map(team => `
+                            <option value="${team}" ${team === match.team1 ? 'selected' : ''}>
+                                ${team}
+                            </option>
+                        `).join('')}
+                    </select>
+                    <input
+                        type="number"
+                        min="0"
+                        value="${match.score1}"
+                        onchange="updateScore('${type}', ${overallMatchIndex}, this.value, null)"
+                        class="text-center w-20 flex-shrink-0 border rounded p-1"
+                        placeholder="Score"
+                    >
+                </div>
+                <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                    <select
+                        class="flex-grow text-sm font-medium overflow-hidden text-ellipsis border rounded p-1"
+                        onchange="updateMatchTeams('${type}', ${overallMatchIndex}, '${match.team1}', this.value)"
+                    >
+                        <option value="" ${match.team2 === "" ? 'selected' : ''}>Select team</option>
+                        ${groupTeams.map(team => `
+                            <option value="${team}" ${team === match.team2 ? 'selected' : ''}>
+                                ${team}
+                            </option>
+                        `).join('')}
+                    </select>
+                    <input
+                        type="number"
+                        min="0"
+                        value="${match.score2}"
+                        onchange="updateScore('${type}', ${overallMatchIndex}, null, this.value)"
+                        class="text-center w-20 flex-shrink-0 border rounded p-1"
+                        placeholder="Score"
+                    >
+                </div>
+                <div class="flex justify-end mt-2">
+                    <button
+                        onclick="setMatchUnplayed('${type}', ${overallMatchIndex})"
+                        class="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded mr-2"
+                    >
+                        Set as Unplayed
+                    </button>
+                    <button
+                        onclick="removeMatch('${type}', ${overallMatchIndex})"
+                        class="text-sm bg-red-500 text-white hover:bg-red-600 px-2 py-1 rounded"
+                    >
+                        Remove Match
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
-state.teamStats = {};
-state.activeTeams.forEach(team => {
-state.teamStats[team] = {
-    wins: 0,
-    pointsScored: 0,
-    pointsConceded: 0,
-    differential: 0
-};
-});
 
-generateGroups(type);
-updateTeamsList(type);
-updateGroupsDisplay(type);
-updateMatchesDisplay(type);
-updateStandings(type);
+function removeMatch(type, matchIndex) {
+    const state = tournamentStates[type];
+    
+    // Remove the match from the matches array
+    state.matches.splice(matchIndex, 1);
+    
+    // Update displays
+    updateMatchesDisplay(type);
+    updateStandings(type);
+    saveToLocalStorage();
+}
 
-// Reset light and hard divisions when starting a new 'all' tournament
-if (type === 'all') {
-['light', 'hard'].forEach(divType => {
-    tournamentStates[divType] = {
-        activeTeams: [],
-        groups: [[], [], []],
-        matches: [],
-        teamStats: {},
-        isFirstGeneration: true
+function createNewMatch(type, courtNumber) {
+    const state = tournamentStates[type];
+    const startTime = new Date();
+    startTime.setHours(9, 0, 0, 0);
+
+    // Find the last match in this court to set proper start time
+    const courtMatches = state.matches.filter(m => m.court === courtNumber);
+    if (courtMatches.length > 0) {
+        const lastMatch = courtMatches[courtMatches.length - 1];
+        const newTime = new Date(lastMatch.startTime);
+        newTime.setMinutes(newTime.getMinutes() + 20); // 20 minute intervals
+        startTime.setTime(newTime.getTime());
+    }
+
+    // Create new match
+    const newMatch = {
+        court: courtNumber,
+        team1: "",  // Empty string for unassigned
+        team2: "",  // Empty string for unassigned
+        score1: 0,
+        score2: 0,
+        startTime: startTime
     };
-    updateGroupsDisplay(divType);
-    updateMatchesDisplay(divType);
-    updateStandings(divType);
-});
+
+    state.matches.push(newMatch);
+    updateMatchesDisplay(type);
+    saveToLocalStorage();
 }
 
-saveToLocalStorage();
+function updateMatchTeams(type, matchIndex, team1, team2) {
+    const state = tournamentStates[type];
+    const match = state.matches[matchIndex];
+    
+    if (!match) return;
+    
+    // Reset scores when teams change
+    match.team1 = team1;
+    match.team2 = team2;
+    match.score1 = 0;
+    match.score2 = 0;
+    
+    updateMatchesDisplay(type);
+    updateStandings(type);
+    saveToLocalStorage();
+}
+
+function setMatchUnplayed(type, matchIndex) {
+    const state = tournamentStates[type];
+    const match = state.matches[matchIndex];
+    
+    if (!match) return;
+    
+    match.team1 = "";
+    match.team2 = "";
+    match.score1 = 0;
+    match.score2 = 0;
+    
+    updateMatchesDisplay(type);
+    updateStandings(type);
+    saveToLocalStorage();
+}
+
+function toggleTournament(type) {
+    const state = tournamentStates[type];
+
+    if (state.isFirstGeneration) {
+    state.activeTeams = [...defaultTeams[type]];
+    state.isFirstGeneration = false;
+    }
+
+    state.teamStats = {};
+    state.activeTeams.forEach(team => {
+    state.teamStats[team] = {
+        wins: 0,
+        pointsScored: 0,
+        pointsConceded: 0,
+        differential: 0
+    };
+    });
+
+    generateGroups(type);
+    updateTeamsList(type);
+    updateGroupsDisplay(type);
+    updateMatchesDisplay(type);
+    updateStandings(type);
+
+    // Reset light and hard divisions when starting a new 'all' tournament
+    if (type === 'all') {
+    ['light', 'hard'].forEach(divType => {
+        tournamentStates[divType] = {
+            activeTeams: [],
+            groups: [[], [], []],
+            matches: [],
+            teamStats: {},
+            isFirstGeneration: true
+        };
+        updateGroupsDisplay(divType);
+        updateMatchesDisplay(divType);
+        updateStandings(divType);
+    });
+    }
+
+    saveToLocalStorage();
 }
 
 function addTeam(type) {
@@ -919,72 +1066,49 @@ function formatTime(date) {
 function updateMatchesDisplay(type) {
     const mainTab = document.getElementById(`${type}-main-tab`);
     if (!mainTab) return;
-
+    
     const container = mainTab.querySelector('.matches-container');
     if (!container) return;
-
+    
     const state = tournamentStates[type];
     if (!state || !state.groups || !state.matches) return;
 
-    container.innerHTML = state.groups.map((groupTeams, groupIndex) => {
-        const groupMatches = state.matches.filter(
-            match => groupTeams.includes(match.team1) || groupTeams.includes(match.team2)
-        );
-        return `
-            <div class="border rounded-lg p-4">
-                <h3 class="font-semibold mb-2">Court ${groupIndex + 1}</h3>
-                <div class="text-sm text-gray-600 mb-4">
-                    <div class="font-medium mb-1">Teams:</div>
-                    ${groupTeams.map(team => `
-                        <div class="whitespace-nowrap overflow-hidden text-ellipsis">
-                            ${team}
+    container.innerHTML = `
+        <div class="${type === 'all' ? 'full-screen-matches' : ''}">
+            ${state.groups.map((groupTeams, groupIndex) => {
+                const courtNumber = groupIndex + 1;
+                const groupMatches = state.matches.filter(match => match.court === courtNumber);
+                
+                return `
+                    <div class="court-container">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold">Court ${courtNumber}</h3>
+                            <button 
+                                onclick="createNewMatch('${type}', ${courtNumber})"
+                                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                            >
+                                Add Match
+                            </button>
                         </div>
-                    `).join('')}
-                </div>
-                <div class="space-y-4">
-                    ${groupMatches.map((match) => {
-                        const overallMatchIndex = state.matches.findIndex(m => m === match);
-                        return `
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <div class="flex justify-between text-sm text-gray-600 mb-2">
-                                    <span>Court ${match.court}</span>
-                                    <span>${formatTime(match.startTime)}</span>
+                        <div class="text-sm text-gray-600 mb-4">
+                            <div class="font-medium mb-1">Teams in this court:</div>
+                            ${groupTeams.map(team => `
+                                <div class="whitespace-nowrap overflow-hidden text-ellipsis">
+                                    ${team}
                                 </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
-                                        <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
-                                            ${match.team1}
-                                        </span>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value="${match.score1 ?? 0}"
-                                            onchange="updateScore('${type}', ${overallMatchIndex}, this.value, null)"
-                                            class="text-center w-20 flex-shrink-0 border rounded p-1"
-                                            placeholder="Score"
-                                        >
-                                    </div>
-                                    <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
-                                        <span class="flex-grow text-sm font-medium overflow-hidden text-ellipsis">
-                                            ${match.team2}
-                                        </span>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value="${match.score2 ?? 0}"
-                                            onchange="updateScore('${type}', ${overallMatchIndex}, null, this.value)"
-                                            class="text-center w-20 flex-shrink-0 border rounded p-1"
-                                            placeholder="Score"
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        `;
-    }).join('');
+                            `).join('')}
+                        </div>
+                        <div class="matches-list">
+                            ${groupMatches.map((match) => {
+                                const overallMatchIndex = state.matches.findIndex(m => m === match);
+                                return getMatchHtml(type, match, overallMatchIndex, groupTeams);
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
 }
 
 function updateScore(type, matchIndex, score1, score2) {
@@ -1030,87 +1154,106 @@ function updateStandings(type) {
     const groupsContainer = mainTab.querySelector('.group-standings');
     const state = tournamentStates[type];
 
-    // Reset all team stats
+    // Reset and recalculate stats
     Object.keys(state.teamStats).forEach(team => {
-    state.teamStats[team] = {
-    wins: 0,
-    pointsScored: 0,
-    pointsConceded: 0,
-    differential: 0
-    };
-});
+        state.teamStats[team] = {
+            wins: 0,
+            pointsScored: 0,
+            pointsConceeded: 0,
+            differential: 0
+        };
+    });
 
-// Recalculate all stats
+    // Calculate all stats first
     state.matches.forEach(match => {
-    if (match.score1 !== null && match.score2 !== null) {
-    state.teamStats[match.team1].pointsScored += match.score1;
-    state.teamStats[match.team1].pointsConceded += match.score2;
-    state.teamStats[match.team2].pointsScored += match.score2;
-    state.teamStats[match.team2].pointsConceded += match.score1;
+        if (match.score1 !== null && match.score2 !== null) {
+            state.teamStats[match.team1].pointsScored += match.score1;
+            state.teamStats[match.team1].pointsConceeded += match.score2;
+            state.teamStats[match.team2].pointsScored += match.score2;
+            state.teamStats[match.team2].pointsConceeded += match.score1;
 
-    if (match.score1 > match.score2) {
-        state.teamStats[match.team1].wins += 1;
-    } else if (match.score2 > match.score1) {
-        state.teamStats[match.team2].wins += 1;
-    }
-    }
+            if (match.score1 > match.score2) {
+                state.teamStats[match.team1].wins += 1;
+            } else if (match.score2 > match.score1) {
+                state.teamStats[match.team2].wins += 1;
+            }
+        }
     });
 
     // Calculate differentials
     Object.keys(state.teamStats).forEach(team => {
-    state.teamStats[team].differential =
-    state.teamStats[team].pointsScored - state.teamStats[team].pointsConceded;
+        state.teamStats[team].differential = 
+            state.teamStats[team].pointsScored - state.teamStats[team].pointsConceeded;
     });
 
-    // Update wins standings
+    // Sort by wins first, then by point differential
     const winsSorted = Object.entries(state.teamStats)
-    .sort(([, a], [, b]) => b.wins - a.wins);
+        .sort(([, a], [, b]) => {
+            if (b.wins !== a.wins) {
+                return b.wins - a.wins;
+            }
+            return b.differential - a.differential;
+        });
 
+    // Update wins standings
     winsContainer.innerHTML = winsSorted.map(([team, stats], index) => `
-    <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
-    <span>${index + 1}. ${team}</span>
-    <span class="font-semibold">${stats.wins} wins</span>
-    </div>
-    `).join('');
-
-    // Update differential standings
-    const diffSorted = Object.entries(state.teamStats)
-    .sort(([, a], [, b]) => b.differential - a.differential);
-
-    diffContainer.innerHTML = diffSorted.map(([team, stats], index) => `
-    <div class="grid grid-cols-4 items-center p-2 bg-gray-100 rounded gap-2">
-    <span>${index + 1}. ${team}</span>
-    <span class="text-green-600">Scored: ${stats.pointsScored}</span>
-    <span class="text-red-600">Conceded: ${stats.pointsConceded}</span>
-    <span class="font-semibold text-right">
-        Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
-    </span>
-    </div>
-    `).join('');
-
-    // Update group standings
-    groupsContainer.innerHTML = state.groups.map((groupTeams, groupIndex) => {
-    const groupStats = groupTeams.map(team => ({
-    team,
-    ...state.teamStats[team]
-    })).sort((a, b) => b.wins - a.wins || b.differential - a.differential);
-
-    return `
-    <div class="bg-white rounded-lg p-4 border mb-4">
-        <h3 class="font-semibold mb-2">Group ${groupIndex + 1}</h3>
-        ${groupStats.map((stats, index) => `
-            <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
-                <span>${index + 1}. ${stats.team}</span>
+        <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+            <span>${index + 1}. ${team}</span>
+            <div class="flex items-center gap-4">
                 <span class="font-semibold">${stats.wins} wins</span>
-                <span class="text-green-600">Scored: ${stats.pointsScored}</span>
-                <span class="text-red-600">Conceded: ${stats.pointsConceded}</span>
-                <span class="font-semibold text-right">
-                    Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
+                <span class="text-sm">
+                    (Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential})
                 </span>
             </div>
-        `).join('')}
-    </div>
-    `;
+        </div>
+    `).join('');
+
+    // Sort by differential only for differential standings
+    const diffSorted = Object.entries(state.teamStats)
+        .sort(([, a], [, b]) => b.differential - a.differential);
+
+    // Update differential standings
+    diffContainer.innerHTML = diffSorted.map(([team, stats], index) => `
+        <div class="grid grid-cols-4 items-center p-2 bg-gray-100 rounded gap-2">
+            <span>${index + 1}. ${team}</span>
+            <span class="text-green-600">Scored: ${stats.pointsScored}</span>
+            <span class="text-red-600">Conceded: ${stats.pointsConceeded}</span>
+            <span class="font-semibold text-right">
+                Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
+            </span>
+        </div>
+    `).join('');
+
+    // Update group standings with the same sorting logic
+    groupsContainer.innerHTML = state.groups.map((groupTeams, groupIndex) => {
+        const groupStats = groupTeams
+            .map(team => ({
+                team,
+                ...state.teamStats[team]
+            }))
+            .sort((a, b) => {
+                if (b.wins !== a.wins) {
+                    return b.wins - a.wins;
+                }
+                return b.differential - a.differential;
+            });
+
+        return `
+            <div class="bg-white rounded-lg p-4 border mb-4">
+                <h3 class="font-semibold mb-2">Group ${groupIndex + 1}</h3>
+                ${groupStats.map((stats, index) => `
+                    <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+                        <span>${index + 1}. ${stats.team}</span>
+                        <span class="font-semibold">${stats.wins} wins</span>
+                        <span class="text-green-600">Scored: ${stats.pointsScored}</span>
+                        <span class="text-red-600">Conceded: ${stats.pointsConceeded}</span>
+                        <span class="font-semibold text-right">
+                            Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential}
+                        </span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
     }).join('');
 }
 

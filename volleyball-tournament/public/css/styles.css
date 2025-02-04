@@ -50,3 +50,28 @@
     border-top: 2px dashed #ddd;
     padding-top: 1rem;
  }
+
+ .matches-container {
+   overflow-x: auto;
+   padding-bottom: 1rem;
+}
+
+.matches-container > div {
+   display: flex;
+   gap: 1rem;
+}
+
+.matches-container > div > div {
+   flex-shrink: 0;
+   width: 20rem;
+}
+
+.custom-wide-container {
+   max-width: 1400px; /* Adjust this value as needed */
+}
+
+@media (max-width: 1500px) {
+   .custom-wide-container {
+       max-width: 95%;
+   }
+}
