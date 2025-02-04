@@ -8,14 +8,14 @@ const tournamentStates = {
     },
     light: {
         activeTeams: [],
-        groups: Array(3).fill().map(() => []),
+        groups: [[]],
         matches: [],
         teamStats: {},
         isFirstGeneration: true
     },
     hard: {
         activeTeams: [],
-        groups: Array(3).fill().map(() => []),
+        groups: [[]],
         matches: [],
         teamStats: {},
         isFirstGeneration: true
@@ -275,8 +275,8 @@ function splitIntoLightAndHard() {
     tournamentStates.hard.activeTeams = hardTeams;
 
     // Reset groups for light and hard
-    tournamentStates.light.groups = [[], [], []];
-    tournamentStates.hard.groups = [[], [], []];
+    tournamentStates.light.groups = [[]];
+    tournamentStates.hard.groups = [[]];
 
     // Distribute teams to groups
     distributeTeamsToGroups(tournamentStates.light);
@@ -299,11 +299,7 @@ function splitIntoLightAndHard() {
 }
 
 function distributeTeamsToGroups(state) {
-    let teamIndex = 0;
-    for (let i = 0; i < state.activeTeams.length; i++) {
-        state.groups[teamIndex].push(state.activeTeams[i]);
-        teamIndex = (teamIndex + 1) % state.groups.length;
-    }
+    state.groups[0] = [...state.activeTeams];
 }
 
 function updateLightHardStandings() {
@@ -482,25 +478,13 @@ function toggleTeamManagement(type) {
 
 function generateGroups(type) {
     const state = tournamentStates[type];
-    const numCourts = type === 'all' ? 6 : 3;
-
-    // Create empty groups array with proper number of courts
-    state.groups = Array(numCourts).fill().map(() => []);
-
+    
     if (type === 'all') {
-        // Use fixed groups for 'all' tournament type
+        // Keep existing logic for 'all' tournament type
         state.groups = [...fixedGroups];
     } else {
-        // Use the original distribution logic for 'light' and 'hard'
-        const shuffledTeams = [...state.activeTeams].sort(() => Math.random() - 0.5);
-        const teamsPerGroup = Math.ceil(shuffledTeams.length / numCourts);
-
-        shuffledTeams.forEach((team, index) => {
-            const groupIndex = Math.floor(index / teamsPerGroup);
-            if (groupIndex < numCourts) {
-                state.groups[groupIndex].push(team);
-            }
-        });
+        // For 'light' and 'hard', put all teams in a single group
+        state.groups = [state.activeTeams];
     }
 
     generateMatches(type);
@@ -826,23 +810,40 @@ function generateRandomScores(type) {
     saveToLocalStorage();
     }
 
-function generateMatches(type) {
-    if (!type || !tournamentStates[type]) return;
-
-    const state = tournamentStates[type];
-    const numCourts = type === 'all' ? 6 : 3;
-    state.matches = [];
-    const matchesPerGroup = 6;
-    const matchDuration = 20;
-
-    state.groups.forEach((group, courtIndex) => {
-        if (group.length >= 2) {
-            for (let i = 0; i < group.length; i++) {
-                for (let j = i + 1; j < group.length; j++) {
+    function generateMatches(type) {
+        if (!type || !tournamentStates[type]) return;
+    
+        const state = tournamentStates[type];
+        state.matches = [];
+        const matchDuration = 20;
+    
+        if (type === 'all') {
+            // Keep existing logic for 'all' tournament type
+            state.groups.forEach((group, courtIndex) => {
+                if (group.length >= 2) {
+                    for (let i = 0; i < group.length; i++) {
+                        for (let j = i + 1; j < group.length; j++) {
+                            state.matches.push({
+                                court: courtIndex + 1,
+                                team1: group[i],
+                                team2: group[j],
+                                score1: 0,
+                                score2: 0,
+                                startTime: new Date()
+                            });
+                        }
+                    }
+                }
+            });
+        } else {
+            // For 'light' and 'hard', create round-robin matches for single group
+            const teams = state.groups[0];
+            for (let i = 0; i < teams.length; i++) {
+                for (let j = i + 1; j < teams.length; j++) {
                     state.matches.push({
-                        court: courtIndex + 1,
-                        team1: group[i],
-                        team2: group[j],
+                        court: 1, // All matches on single court
+                        team1: teams[i],
+                        team2: teams[j],
                         score1: 0,
                         score2: 0,
                         startTime: new Date()
@@ -850,58 +851,68 @@ function generateMatches(type) {
                 }
             }
         }
-    });
-
-    const startTime = new Date();
-    startTime.setHours(9, 0, 0, 0);
-
-    for (let matchIndex = 0; matchIndex < matchesPerGroup; matchIndex++) {
-        const matchTime = new Date(startTime);
-        matchTime.setMinutes(matchTime.getMinutes() + (matchIndex * matchDuration));
-
-        state.groups.forEach((_, courtIndex) => {
-            const courtMatches = state.matches.filter(m => m.court === courtIndex + 1);
-            if (matchIndex < courtMatches.length) {
-                courtMatches[matchIndex].startTime = new Date(matchTime);
-            }
+    
+        // Set match times
+        const startTime = new Date();
+        startTime.setHours(9, 0, 0, 0);
+    
+        state.matches.forEach((match, index) => {
+            const matchTime = new Date(startTime);
+            matchTime.setMinutes(matchTime.getMinutes() + (index * matchDuration));
+            match.startTime = new Date(matchTime);
         });
     }
-}
-
-function updateGroupsDisplay(type) {
-    const mainTab = document.getElementById(`${type}-main-tab`);
-    const container = mainTab.querySelector('.groups-container');
-    const state = tournamentStates[type];
-
-    // Get rankings from 'all' tournament if we're in light or hard tab
-    const allRankings = (type === 'light' || type === 'hard') ? 
-        getAllRankings(tournamentStates.all.teamStats) : 
-        null;
-
-    container.innerHTML = state.groups.map((group, groupIndex) => `
-        <div class="border rounded-lg p-4">
-            <h3 class="font-semibold mb-2">Court ${groupIndex + 1}</h3>
-            <ul class="space-y-2">
-                ${group.map(team => `
-                    <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <div class="flex items-center gap-2">
-                            <span>${team}</span>
-                            ${allRankings && allRankings[team] ? 
-                                `<span class="text-sm text-gray-600">(All Rank: #${allRankings[team]})</span>` 
-                                : ''}
-                        </div>
-                        <button 
-                            onclick="showSwitchTeamModal('${team}', ${groupIndex})" 
-                            class="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 rounded border border-blue-500 hover:border-blue-700"
-                        >
-                            Switch Group
-                        </button>
-                    </li>
-                `).join('')}
-            </ul>
-        </div>
-    `).join('');
-}
+    function updateGroupsDisplay(type) {
+        const mainTab = document.getElementById(`${type}-main-tab`);
+        const container = mainTab.querySelector('.groups-container');
+        const state = tournamentStates[type];
+    
+        if (type === 'all') {
+            // Keep existing display logic for 'all' tournament type
+            container.innerHTML = state.groups.map((groupTeams, groupIndex) => `
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold mb-2">Court ${groupIndex + 1}</h3>
+                    <ul class="space-y-2">
+                        ${groupTeams.map(team => `
+                            <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                <span>${team}</span>
+                                <button 
+                                    onclick="showSwitchTeamModal('${team}', ${groupIndex})" 
+                                    class="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 rounded border border-blue-500 hover:border-blue-700"
+                                >
+                                    Switch Group
+                                </button>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        } else {
+            // For 'light' and 'hard', display single group with previous rankings
+            const allRankings = getAllRankings(tournamentStates.all.teamStats);
+            container.innerHTML = `
+                <div class="border rounded-lg p-4 col-span-full">
+                    <h3 class="font-semibold mb-2">${type.charAt(0).toUpperCase() + type.slice(1)} Division Teams</h3>
+                    <ul class="space-y-2">
+                        ${state.activeTeams.map(team => {
+                            const previousRank = allRankings[team];
+                            const stats = tournamentStates.all.teamStats[team];
+                            return `
+                                <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                    <div class="flex items-center gap-4">
+                                        <span class="font-medium">${team}</span>
+                                        <span class="text-sm text-gray-600">
+                                            (Previous rank: #${previousRank}, ${stats.wins} wins, Diff: ${stats.differential > 0 ? '+' : ''}${stats.differential})
+                                        </span>
+                                    </div>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+    }
 
 function formatTime(date) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
