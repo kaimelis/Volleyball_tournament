@@ -3,10 +3,6 @@ const tournamentStates = {
         activeTeams: [],
         groups: Array(6).fill().map(() => []),
         matches: [],
-        bracketMatches: {
-            winners: [],
-            losers: []
-        },
         teamStats: {},
         isFirstGeneration: true
     },
@@ -14,10 +10,6 @@ const tournamentStates = {
         activeTeams: [],
         groups: Array(3).fill().map(() => []),
         matches: [],
-        bracketMatches: {
-            winners: [],
-            losers: []
-        },
         teamStats: {},
         isFirstGeneration: true
     },
@@ -25,10 +17,6 @@ const tournamentStates = {
         activeTeams: [],
         groups: Array(3).fill().map(() => []),
         matches: [],
-        bracketMatches: {
-            winners: [],
-            losers: []
-        },
         teamStats: {},
         isFirstGeneration: true
     }
@@ -38,24 +26,110 @@ let currentTournamentType = 'all';
 // Default teams
 const defaultTeams = {
     all: [
-        "Spike Masters", "Beach Kings", "Sand Storm", "Wave Riders",
-        "Net Ninjas", "Coastal Crew", "Sun Setters", "Beach Blast",
-        "Sand Devils", "Ocean's 6", "Tidal Force", "Palm Beach",
-        "Sandy Aces", "Beach Breakers", "Surf Squad", "Volleyball Vic's",
-        "Sea Smashers", "Coast Guards", "Beach Bros", "Sand Stars", 
-        "Wave Warriors", "Beach Legends", "Net Nobles", "Sand Sharks"
+        // Group A
+        "Kotryna & Julija",
+        "Brukštienė & Grigaitytė",
+        "Ivanova & Plaščynskaitė",
+        "Vaiva & Fausta",
+        
+        // Group B
+        "Goda & Julija",
+        "Rimgailė & Laima",
+        "JuliAna",
+        "Ramalė & Julia",
+        
+        // Group C
+        "Gadelkytė & Vaisėtaitė",
+        "Bakšytė & Trečiokaitė",
+        "Musteikienė & Vileikytė",
+        "Savostenok & Šaparauskaitė",
+        
+        // Group D
+        "Ieva & Rūta",
+        "Raupelienė & Žalytė",
+        "Aistė & Karolina",
+        "Milevskaja & Pečkaitė",
+        
+        // Group E
+        "Veda & Agnė",
+        "Linos Mokykla",
+        "Lyskoit & Suchockaitė",
+        "Petrauskė & Drungilienė",
+        
+        // Group F
+        "Teisininkai",
+        "Blokelis",
+        "Giliun & Vaikutytė",
+        "Abukauskaitė & Dzičkovska"
     ],
     light: [
-        "Spike Masters", "Beach Kings", "Sand Storm", "Wave Riders",
-        "Net Ninjas", "Coastal Crew", "Sun Setters", "Beach Blast",
-        "Sand Devils", "Ocean's 6", "Tidal Force", "Palm Beach"
+        "Kotryna & Julija",
+        "Brukštienė & Grigaitytė",
+        "JuliAna",
+        "Ramalė & Julia",
+        "Musteikienė & Vileikytė",
+        "Ieva & Rūta",
+        "Raupelienė & Žalytė",
+        "Aistė & Karolina",
+        "Milevskaja & Pečkaitė",
+        "Veda & Agnė",
+        "Teisininkai",
+        "Blokelis"
     ],
     hard: [
-        "Sandy Aces", "Beach Breakers", "Surf Squad", "Volleyball Vic's",
-        "Sea Smashers", "Coast Guards", "Beach Bros", "Sand Stars", 
-        "Wave Warriors", "Beach Legends", "Net Nobles", "Sand Sharks"
+        "Ivanova & Plaščynskaitė",
+        "Vaiva & Fausta",
+        "Goda & Julija",
+        "Rimgailė & Laima",
+        "Gadelkytė & Vaisėtaitė",
+        "Bakšytė & Trečiokaitė",
+        "Savostenok & Šaparauskaitė",
+        "Linos Mokykla",
+        "Lyskoit & Suchockaitė",
+        "Petrauskė & Drungilienė",
+        "Giliun & Vaikutytė",
+        "Abukauskaitė & Dzičkovska"
     ]
 };
+
+const fixedGroups = [
+    [ // Group A
+        "Kotryna & Julija",
+        "Brukštienė & Grigaitytė",
+        "Ivanova & Plaščynskaitė",
+        "Vaiva & Fausta"
+    ],
+    [ // Group B
+        "Goda & Julija",
+        "Rimgailė & Laima",
+        "JuliAna",
+        "Ramalė & Julia"
+    ],
+    [ // Group C
+        "Gadelkytė & Vaisėtaitė",
+        "Bakšytė & Trečiokaitė",
+        "Musteikienė & Vileikytė",
+        "Savostenok & Šaparauskaitė"
+    ],
+    [ // Group D
+        "Ieva & Rūta",
+        "Raupelienė & Žalytė",
+        "Aistė & Karolina",
+        "Milevskaja & Pečkaitė"
+    ],
+    [ // Group E
+        "Veda & Agnė",
+        "Linos Mokykla",
+        "Lyskoit & Suchockaitė",
+        "Petrauskė & Drungilienė"
+    ],
+    [ // Group F
+        "Teisininkai",
+        "Blokelis",
+        "Giliun & Vaikutytė",
+        "Abukauskaitė & Dzičkovska"
+    ]
+];
 
 
 let activeTeams = [];
@@ -67,20 +141,24 @@ let selectedTeam = null;
 let selectedGroupIndex = null;
 
 function initializeTournamentSections() {
-const fullTemplate = document.getElementById('tournament-section-template');
-const simplifiedTemplate = document.getElementById('tournament-section-template-simplified');
+    return new Promise(resolve => {
+        const fullTemplate = document.getElementById('tournament-section-template');
+        const simplifiedTemplate = document.getElementById('tournament-section-template-simplified');
 
-// Initialize 'all' section with full template
-const allContainer = document.getElementById('all-main-tab');
-allContainer.innerHTML = fullTemplate.innerHTML;
-setupEventListeners(allContainer, 'all');
+        // Initialize 'all' section with full template
+        const allContainer = document.getElementById('all-main-tab');
+        allContainer.innerHTML = fullTemplate.innerHTML;
+        setupEventListeners(allContainer, 'all');
 
-// Initialize light and hard sections with simplified template
-['light', 'hard'].forEach(type => {
-    const container = document.getElementById(`${type}-main-tab`);
-    container.innerHTML = simplifiedTemplate.innerHTML;
-    setupSimplifiedEventListeners(container, type);
-});
+        // Initialize light and hard sections with simplified template
+        ['light', 'hard'].forEach(type => {
+            const container = document.getElementById(`${type}-main-tab`);
+            container.innerHTML = simplifiedTemplate.innerHTML;
+            setupSimplifiedEventListeners(container, type);
+        });
+
+        resolve();
+    });
 }
 
 function updateMatchTime(type, matchIndex, newTime) {
@@ -134,14 +212,6 @@ function setupSimplifiedEventListeners(container, type) {
     container.querySelector('.random-scores-button').addEventListener('click', () => {
         generateRandomScores(type);
     });
-
-    container.querySelector('.clear-button').addEventListener('click', () => {
-        clearTournamentData(type);
-    });
-
-    container.querySelector('.generate-bracket-button').addEventListener('click', () => {
-        generateBracket(type);
-    });
 }
 
 function setupEventListeners(container, type) {
@@ -172,10 +242,6 @@ function setupEventListeners(container, type) {
         generateRandomScores(type);
     });
 
-    container.querySelector('.reshuffle-button').addEventListener('click', () => {
-        reshuffleTeams(type);
-    });
-
     container.querySelector('.clear-button').addEventListener('click', () => {
         clearTournamentData(type);
     });
@@ -185,9 +251,6 @@ function setupEventListeners(container, type) {
         if (e.key === 'Enter') {
             addTeam(type);
         }
-    });
-    container.querySelector('.generate-bracket-button').addEventListener('click', () => {
-        generateBracket(type);
     });
 }
 
@@ -417,290 +480,33 @@ function toggleTeamManagement(type) {
     }
 }
 
-function generateBracket(type) {
-    const state = tournamentStates[type];
-    const teams = [...state.activeTeams];
-    
-    // Reset bracket matches
-    state.bracketMatches = {
-        winners: [],
-        losers: []
-    };
-
-    // Generate winners bracket first round
-    const numTeams = teams.length;
-    const firstRoundMatches = Math.pow(2, Math.ceil(Math.log2(numTeams)));
-    const byes = firstRoundMatches - numTeams;
-
-    // Shuffle teams
-    for (let i = teams.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [teams[i], teams[j]] = [teams[j], teams[i]];
-    }
-
-    // Create first round matches with byes
-    const firstRound = [];
-    for (let i = 0; i < firstRoundMatches / 2; i++) {
-        if (i < byes / 2) {
-            firstRound.push({
-                team1: teams[i],
-                team2: "BYE",
-                score1: null,
-                score2: null,
-                round: 1,
-                matchNumber: i + 1
-            });
-        } else {
-            firstRound.push({
-                team1: teams[i],
-                team2: teams[teams.length - (i - Math.floor(byes/2)) - 1] || "BYE",
-                score1: null,
-                score2: null,
-                round: 1,
-                matchNumber: i + 1
-            });
-        }
-    }
-
-    state.bracketMatches.winners = firstRound;
-    updateBracketDisplay(type);
-    saveToLocalStorage();
-}
-
-function updateBracketScore(type, bracket, matchIndex, score1, score2) {
-    const state = tournamentStates[type];
-    const match = state.bracketMatches[bracket][matchIndex];
-
-    if (!match) return;
-
-    if (score1 !== null) match.score1 = parseInt(score1) || 0;
-    if (score2 !== null) match.score2 = parseInt(score2) || 0;
-
-    // Only process completed matches
-    if (match.score1 !== null && match.score2 !== null) {
-        const winner = match.score1 > match.score2 ? match.team1 : match.team2;
-        const loser = match.score1 > match.score2 ? match.team2 : match.team1;
-
-        if (bracket === 'winners') {
-            // Handle winners bracket progression
-            const nextRoundMatch = Math.floor((match.matchNumber - 1) / 2) + 1;
-            const isFirstTeam = match.matchNumber % 2 === 1;
-
-            let nextMatch = state.bracketMatches.winners.find(m => 
-                m.round === match.round + 1 && m.matchNumber === nextRoundMatch
-            );
-
-            if (!nextMatch) {
-                nextMatch = {
-                    round: match.round + 1,
-                    matchNumber: nextRoundMatch,
-                    team1: isFirstTeam ? winner : null,
-                    team2: isFirstTeam ? null : winner,
-                    score1: null,
-                    score2: null
-                };
-                state.bracketMatches.winners.push(nextMatch);
-            } else {
-                if (isFirstTeam) {
-                    nextMatch.team1 = winner;
-                } else {
-                    nextMatch.team2 = winner;
-                }
-            }
-
-            // Add loser to losers bracket if not BYE
-            if (loser !== 'BYE') {
-                const loserBracketRound = match.round;
-                const loserMatchNumber = state.bracketMatches.losers.length + 1;
-                
-                // Find or create the appropriate losers bracket match
-                let loserMatch = state.bracketMatches.losers.find(m => 
-                    m.round === loserBracketRound && 
-                    (!m.team1 || !m.team2)
-                );
-
-                if (!loserMatch) {
-                    loserMatch = {
-                        round: loserBracketRound,
-                        matchNumber: loserMatchNumber,
-                        team1: loser,
-                        team2: null,
-                        score1: null,
-                        score2: null
-                    };
-                    state.bracketMatches.losers.push(loserMatch);
-                } else {
-                    if (!loserMatch.team1) {
-                        loserMatch.team1 = loser;
-                    } else {
-                        loserMatch.team2 = loser;
-                    }
-                }
-            }
-        } else if (bracket === 'losers') {
-            // Handle losers bracket progression
-            const nextRoundMatch = Math.floor((match.matchNumber - 1) / 2) + 1;
-            let nextMatch = state.bracketMatches.losers.find(m => 
-                m.round === match.round + 1 && m.matchNumber === nextRoundMatch
-            );
-
-            if (!nextMatch && winner !== 'BYE') {
-                nextMatch = {
-                    round: match.round + 1,
-                    matchNumber: nextRoundMatch,
-                    team1: winner,
-                    team2: null,
-                    score1: null,
-                    score2: null
-                };
-                state.bracketMatches.losers.push(nextMatch);
-            } else if (nextMatch && winner !== 'BYE') {
-                if (!nextMatch.team1) {
-                    nextMatch.team1 = winner;
-                } else {
-                    nextMatch.team2 = winner;
-                }
-            }
-        }
-    }
-
-    updateBracketDisplay(type);
-    saveToLocalStorage();
-}
-
-function updateBracketDisplay(type) {
-    const mainTab = document.getElementById(`${type}-main-tab`);
-    const winnersContainer = mainTab.querySelector('.winners-bracket');
-    const losersContainer = mainTab.querySelector('.losers-bracket');
-    const state = tournamentStates[type];
-
-    // Group matches by round
-    const winnerRounds = {};
-    state.bracketMatches.winners.forEach(match => {
-        if (!winnerRounds[match.round]) {
-            winnerRounds[match.round] = [];
-        }
-        winnerRounds[match.round].push(match);
-    });
-
-    const loserRounds = {};
-    state.bracketMatches.losers.forEach(match => {
-        if (!loserRounds[match.round]) {
-            loserRounds[match.round] = [];
-        }
-        loserRounds[match.round].push(match);
-    });
-
-    // Generate winners bracket HTML
-    winnersContainer.innerHTML = `
-        <div class="mb-6">
-            <h3 class="font-semibold mb-4 text-lg">Winners Bracket</h3>
-            <div class="flex gap-8">
-                ${Object.entries(winnerRounds)
-                    .map(([round, matches]) => `
-                        <div class="bracket-round">
-                            <h4 class="font-semibold mb-2">Round ${round}</h4>
-                            ${matches.map((match, idx) => `
-                                <div class="bracket-match mb-4 ${match.winner ? 'border-green-500' : ''}">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm text-gray-600">Match ${match.matchNumber}</span>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="flex-grow">${match.team1}</span>
-                                            <input
-                                                type="number"
-                                                value="${match.score1 ?? ''}"
-                                                onchange="updateBracketScore('${type}', 'winners', ${match.matchNumber-1}, this.value, null)"
-                                                class="w-16 text-center border rounded p-1"
-                                                ${match.team1 === 'BYE' ? 'disabled' : ''}
-                                            >
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="flex-grow">${match.team2}</span>
-                                            <input
-                                                type="number"
-                                                value="${match.score2 ?? ''}"
-                                                onchange="updateBracketScore('${type}', 'winners', ${match.matchNumber-1}, null, this.value)"
-                                                class="w-16 text-center border rounded p-1"
-                                                ${match.team2 === 'BYE' ? 'disabled' : ''}
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `).join('')}
-            </div>
-        </div>`;
-
-    // Generate losers bracket HTML
-    losersContainer.innerHTML = `
-        <div>
-            <h3 class="font-semibold mb-4 text-lg">Losers Bracket</h3>
-            <div class="flex gap-8">
-                ${Object.entries(loserRounds)
-                    .map(([round, matches]) => `
-                        <div class="bracket-round">
-                            <h4 class="font-semibold mb-2">Round ${round}</h4>
-                            ${matches.map((match, idx) => `
-                                <div class="bracket-match mb-4 ${match.winner ? 'border-green-500' : ''}">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm text-gray-600">Match ${match.matchNumber}</span>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="flex-grow">${match.team1}</span>
-                                            <input
-                                                type="number"
-                                                value="${match.score1 ?? ''}"
-                                                onchange="updateBracketScore('${type}', 'losers', ${match.matchNumber-1}, this.value, null)"
-                                                class="w-16 text-center border rounded p-1"
-                                            >
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="flex-grow">${match.team2}</span>
-                                            <input
-                                                type="number"
-                                                value="${match.score2 ?? ''}"
-                                                onchange="updateBracketScore('${type}', 'losers', ${match.matchNumber-1}, null, this.value)"
-                                                class="w-16 text-center border rounded p-1"
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `).join('')}
-            </div>
-        </div>`;
-}
-
 function generateGroups(type) {
-const state = tournamentStates[type];
-const numCourts = type === 'all' ? 6 : 3;
+    const state = tournamentStates[type];
+    const numCourts = type === 'all' ? 6 : 3;
 
-// Create empty groups array with proper number of courts
-state.groups = Array(numCourts).fill().map(() => []);
+    // Create empty groups array with proper number of courts
+    state.groups = Array(numCourts).fill().map(() => []);
 
-// Shuffle active teams
-const shuffledTeams = [...state.activeTeams].sort(() => Math.random() - 0.5);
+    if (type === 'all') {
+        // Use fixed groups for 'all' tournament type
+        state.groups = [...fixedGroups];
+    } else {
+        // Use the original distribution logic for 'light' and 'hard'
+        const shuffledTeams = [...state.activeTeams].sort(() => Math.random() - 0.5);
+        const teamsPerGroup = Math.ceil(shuffledTeams.length / numCourts);
 
-// Calculate teams per group
-const teamsPerGroup = Math.ceil(shuffledTeams.length / numCourts);
-
-// Distribute teams
-shuffledTeams.forEach((team, index) => {
-    const groupIndex = Math.floor(index / teamsPerGroup);
-    if (groupIndex < numCourts) {
-        state.groups[groupIndex].push(team);
+        shuffledTeams.forEach((team, index) => {
+            const groupIndex = Math.floor(index / teamsPerGroup);
+            if (groupIndex < numCourts) {
+                state.groups[groupIndex].push(team);
+            }
+        });
     }
-});
 
-generateMatches(type);
-updateGroupsDisplay(type);
-updateMatchesDisplay(type);
-updateStandings(type);
+    generateMatches(type);
+    updateGroupsDisplay(type);
+    updateMatchesDisplay(type);
+    updateStandings(type);
 }
 
 function getMatchHtml(type, match, overallMatchIndex, groupTeams) {
@@ -721,7 +527,7 @@ function getMatchHtml(type, match, overallMatchIndex, groupTeams) {
                         class="flex-grow text-sm font-medium overflow-hidden text-ellipsis border rounded p-1"
                         onchange="updateMatchTeams('${type}', ${overallMatchIndex}, this.value, '${match.team2}')"
                     >
-                        <option value="" ${match.team1 === "" ? 'selected' : ''}>Select team</option>
+                        <option value="" ${!match.team1 ? 'selected' : ''}>Select team</option>
                         ${groupTeams.map(team => `
                             <option value="${team}" ${team === match.team1 ? 'selected' : ''}>
                                 ${team}
@@ -742,7 +548,7 @@ function getMatchHtml(type, match, overallMatchIndex, groupTeams) {
                         class="flex-grow text-sm font-medium overflow-hidden text-ellipsis border rounded p-1"
                         onchange="updateMatchTeams('${type}', ${overallMatchIndex}, '${match.team1}', this.value)"
                     >
-                        <option value="" ${match.team2 === "" ? 'selected' : ''}>Select team</option>
+                        <option value="" ${!match.team2 ? 'selected' : ''}>Select team</option>
                         ${groupTeams.map(team => `
                             <option value="${team}" ${team === match.team2 ? 'selected' : ''}>
                                 ${team}
@@ -841,14 +647,27 @@ function setMatchUnplayed(type, matchIndex) {
     const match = state.matches[matchIndex];
     
     if (!match) return;
-    
-    match.team1 = "";
-    match.team2 = "";
+
+    // Store original teams to update stats if needed
+    const originalTeam1 = match.team1;
+    const originalTeam2 = match.team2;
+    const originalScore1 = match.score1;
+    const originalScore2 = match.score2;
+
+    // Reset match data
     match.score1 = 0;
     match.score2 = 0;
-    
+
+    // Update team stats if necessary
+    if (originalTeam1 && originalTeam2 && (originalScore1 > 0 || originalScore2 > 0)) {
+        updateTeamStats(type, originalTeam1, originalTeam2, -originalScore1, -originalScore2);
+    }
+
     updateMatchesDisplay(type);
     updateStandings(type);
+
+    match.team1 = '';
+    match.team2 = '';
     saveToLocalStorage();
 }
 
@@ -881,7 +700,7 @@ function toggleTournament(type) {
     ['light', 'hard'].forEach(divType => {
         tournamentStates[divType] = {
             activeTeams: [],
-            groups: [[], [], []],
+            groups: [[]],
             matches: [],
             teamStats: {},
             isFirstGeneration: true
@@ -1123,7 +942,7 @@ function updateMatchesDisplay(type) {
                                 </div>
                             `).join('')}
                         </div>
-                        <div class="matches-list">
+                        <div class="matches-list space-y-4">
                             ${groupMatches.map((match) => {
                                 const overallMatchIndex = state.matches.findIndex(m => m === match);
                                 return getMatchHtml(type, match, overallMatchIndex, groupTeams);
@@ -1141,6 +960,8 @@ function updateScore(type, matchIndex, score1, score2) {
     const match = state.matches[matchIndex];
 
     if (!match) return;
+
+    if (match.team1 === '' || match.team2 === '') return;
 
     if (score1 !== null) match.score1 = parseInt(score1) || 0;
     if (score2 !== null) match.score2 = parseInt(score2) || 0;
@@ -1174,23 +995,58 @@ function updateScore(type, matchIndex, score1, score2) {
 
 function updateStandings(type) {
     const mainTab = document.getElementById(`${type}-main-tab`);
+    if (!mainTab) return;
+
     const winsContainer = mainTab.querySelector('.wins-standings');
     const diffContainer = mainTab.querySelector('.differential-standings');
     const groupsContainer = mainTab.querySelector('.group-standings');
-    const state = tournamentStates[type];
+    if (!winsContainer || !diffContainer || !groupsContainer) return;
 
-    // Reset and recalculate stats
-    Object.keys(state.teamStats).forEach(team => {
-        state.teamStats[team] = {
-            wins: 0,
-            pointsScored: 0,
-            pointsConceeded: 0,
-            differential: 0
-        };
+    const state = tournamentStates[type];
+    if (!state) return;
+
+    // Initialize stats for all active teams
+    state.activeTeams.forEach(team => {
+        if (!state.teamStats[team]) {
+            state.teamStats[team] = {
+                wins: 0,
+                pointsScored: 0,
+                pointsConceeded: 0,
+                differential: 0
+            };
+        }
     });
 
-    // Calculate all stats first
+    // Reset and recalculate stats for all teams involved in matches
+    const teamsInMatches = new Set();
     state.matches.forEach(match => {
+        if (match.team1) teamsInMatches.add(match.team1);
+        if (match.team2) teamsInMatches.add(match.team2);
+    });
+
+    [...teamsInMatches].forEach(team => {
+        if (!state.teamStats[team]) {
+            state.teamStats[team] = {
+                wins: 0,
+                pointsScored: 0,
+                pointsConceeded: 0,
+                differential: 0
+            };
+        } else {
+            // Reset existing stats
+            state.teamStats[team] = {
+                wins: 0,
+                pointsScored: 0,
+                pointsConceeded: 0,
+                differential: 0
+            };
+        }
+    });
+
+    // Calculate all stats
+    state.matches.forEach(match => {
+        if (!match.team1 || !match.team2) return; // Skip matches without both teams assigned
+
         if (match.score1 !== null && match.score2 !== null) {
             state.teamStats[match.team1].pointsScored += match.score1;
             state.teamStats[match.team1].pointsConceeded += match.score2;
@@ -1249,7 +1105,7 @@ function updateStandings(type) {
         </div>
     `).join('');
 
-    // Update group standings with the same sorting logic
+    // Update group standings
     groupsContainer.innerHTML = state.groups.map((groupTeams, groupIndex) => {
         const groupStats = groupTeams
             .map(team => ({
@@ -1262,6 +1118,8 @@ function updateStandings(type) {
                 }
                 return b.differential - a.differential;
             });
+
+        if (groupTeams.length === 0) return ''; // Skip empty groups
 
         return `
             <div class="bg-white rounded-lg p-4 border mb-4">
@@ -1349,49 +1207,51 @@ function switchTeamGroup() {
 }
 
 function loadFromLocalStorage() {
-    const savedData = localStorage.getItem('volleyballTournament');
-    if (!savedData) return false;
-    
     try {
+        const savedData = localStorage.getItem('moteru-turnyras');
+        if (!savedData) return false;
+
         const loadedData = JSON.parse(savedData);
-        
+
         ['all', 'light', 'hard'].forEach(type => {
+            // First check if the main tab exists before trying to update
+            const mainTab = document.getElementById(`${type}-main-tab`);
+            if (!mainTab) return; // Skip this iteration if tab doesn't exist
+
+            // Initialize state
             if (!loadedData[type]) {
                 loadedData[type] = {
                     activeTeams: [],
                     groups: Array(type === 'all' ? 6 : 3).fill().map(() => []),
                     matches: [],
-                    bracketMatches: {
-                        winners: [],
-                        losers: []
-                    },
                     teamStats: {},
                     isFirstGeneration: true
                 };
             }
 
+            // Ensure match data is properly initialized
+            const matches = (loadedData[type].matches || []).map(match => ({
+                court: match.court,
+                team1: match.team1 || '', // Convert null to empty string
+                team2: match.team2 || '', // Convert null to empty string
+                score1: match.score1 || 0,
+                score2: match.score2 || 0,
+                startTime: new Date(match.startTime)
+            }));
+
             tournamentStates[type] = {
                 ...loadedData[type],
-                matches: (loadedData[type].matches || []).map(match => ({
-                    ...match,
-                    startTime: new Date(match.startTime)
-                })),
-                bracketMatches: loadedData[type].bracketMatches || {
-                    winners: [],
-                    losers: []
-                }
+                matches: matches,
+                teamStats: loadedData[type].teamStats || {}
             };
-            
-            // Defer UI updates to ensure DOM is ready
-            setTimeout(() => {
-                updateTeamsList(type);
-                updateGroupsDisplay(type);
-                updateMatchesDisplay(type);
-                updateStandings(type);
-                updateBracketDisplay(type);
-            }, 0);
+
+            // Only update displays if the containers exist
+            if (mainTab.querySelector('.teams-list')) updateTeamsList(type);
+            if (mainTab.querySelector('.groups-container')) updateGroupsDisplay(type);
+            if (mainTab.querySelector('.matches-container')) updateMatchesDisplay(type);
+            if (mainTab.querySelector('.wins-standings')) updateStandings(type);
         });
-        
+
         return true;
     } catch (error) {
         console.error('Error loading saved data:', error);
@@ -1411,7 +1271,7 @@ function saveToLocalStorage() {
     };
     });
 
-    localStorage.setItem('volleyballTournament', JSON.stringify(dataToSave));
+    localStorage.setItem('moteru-turnyras', JSON.stringify(dataToSave));
 }
 
 function clearTournamentData(type) {
@@ -1430,26 +1290,32 @@ function clearTournamentData(type) {
     saveToLocalStorage();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initializeTournamentSections();
-    const loaded = loadFromLocalStorage();
-    if (!loaded) {
-        Object.keys(tournamentStates).forEach(type => {
-            toggleTournament(type);
-        });
-    }
+document.addEventListener('DOMContentLoaded', async () => {
+    // First initialize the tournament sections
+    await initializeTournamentSections();
 
-    const splitButton = document.getElementById('split-teams-button');
-    if (splitButton) {
-        splitButton.addEventListener('click', function() {
-            if (typeof splitIntoLightAndHard === 'function') {
-                splitIntoLightAndHard();
-                updateLightHardStandings();
-            } else {
-                console.error('Function splitIntoLightAndHard is not defined');
-            }
-        });
-    } else {
-        console.error('Button split-teams-button not found');
-    }
+    // Add a small delay to ensure DOM elements are ready
+    setTimeout(() => {
+        // Then try to load saved data
+        const loaded = loadFromLocalStorage();
+        if (!loaded) {
+            // If no saved data, initialize new tournaments
+            Object.keys(tournamentStates).forEach(type => {
+                toggleTournament(type);
+            });
+        }
+
+        // Set up split button event listener
+        const splitButton = document.getElementById('split-teams-button');
+        if (splitButton) {
+            splitButton.addEventListener('click', () => {
+                if (typeof splitIntoLightAndHard === 'function') {
+                    splitIntoLightAndHard();
+                    updateLightHardStandings();
+                } else {
+                    console.error('Function splitIntoLightAndHard is not defined');
+                }
+            });
+        }
+    }, 100); // Small delay to ensure DOM is ready
 });

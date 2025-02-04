@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>BeachBros Volleyball Tournament</title>
+        <title>BeachBros Moteru Paplūdimio Turnyras</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="/public/css/styles.css">
         <link rel="stylesheet" href="/public/css/output.css">
@@ -24,7 +24,7 @@
                     <div class="border-b">
                         <div class="flex gap-4 px-4">
                             <button class="tab-button active-tab" data-action="manage">Manage</button>
-                            <button class="tab-button" data-action="bracket">Bracket</button>
+                            <button class="tab-button" data-action="matches">Matches</button>
                         </div>
                     </div>
                     
@@ -47,9 +47,6 @@
                                         <button class="random-scores-button flex-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
                                             Generate Random Scores
                                         </button>
-                                        <button class="clear-button flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                                            Delete Tournament
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -57,18 +54,6 @@
                 
                         <div class="groups-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <!-- Groups will be inserted here -->
-                        </div>
-                    </div>
-                
-                    <!-- Bracket Content -->
-                    <div class="tab-content" data-content="bracket">
-                        <div class="p-4">
-                            <h2 class="text-xl font-bold mb-4">Double Elimination Bracket</h2>
-                            <button class="generate-bracket-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">
-                                Generate Bracket
-                            </button>
-                            <div class="winners-bracket bracket-container"></div>
-                            <div class="losers-bracket bracket-container"></div>
                         </div>
                     </div>
                 </template>
@@ -132,10 +117,6 @@
                                             Delete Tournament
                                         </button>
                                     </div>
-                                    <h3 class="font-semibold mt-4 mb-2">Configuration</h3>
-                                    <button class="reshuffle-button w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                                        Reshuffle Teams
-                                    </button>
                                 </div>
                             </div>
                         </div>
