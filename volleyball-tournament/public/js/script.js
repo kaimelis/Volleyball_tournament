@@ -768,13 +768,31 @@ saveToLocalStorage();
 }
 
 function removeTeam(type, teamName) {
-    tournamentStates[type].activeTeams = tournamentStates[type].activeTeams.filter(team => team !== teamName);
+    const state = tournamentStates[type];
+    
+    // Remove from active teams
+    state.activeTeams = state.activeTeams.filter(team => team !== teamName);
+    
+    // Remove from groups
+    state.groups = state.groups.map(group => 
+        group.filter(team => team !== teamName)
+    );
+    
+    // Remove matches involving this team
+    state.matches = state.matches.filter(match => 
+        match.team1 !== teamName && match.team2 !== teamName
+    );
+    
+    // Remove team stats
+    delete state.teamStats[teamName];
+    
+    // Update displays
     updateTeamsList(type);
-    initializeTeamStats(type);
-    generateGroups(type);
+    updateGroupsDisplay(type);
+    updateMatchesDisplay(type);
+    updateStandings(type);
     saveToLocalStorage();
 }
-
 function updateTeamsList(type) {
     const mainTab = document.getElementById(`${type}-main-tab`);
     if (!mainTab) {
