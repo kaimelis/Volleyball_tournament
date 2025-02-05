@@ -992,66 +992,54 @@ function updateMatchesDisplay(type) {
     const state = tournamentStates[type];
     if (!state || !state.matches) return;
 
-    // Different display logic based on tournament type
-    if (type === 'all') {
-        // Keep existing 'all' division logic
-        container.innerHTML = `
-            <div class="full-screen-matches">
-                ${state.groups.map((groupTeams, groupIndex) => {
-                    const courtNumber = groupIndex + 1;
-                    const groupMatches = state.matches.filter(match => match.court === courtNumber);
-                    
-                    return `
-                        <div class="court-container">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="font-semibold">Court ${courtNumber}</h3>
-                            </div>
-                            <div class="matches-list space-y-4">
-                                ${groupMatches.map((match) => {
-                                    const overallMatchIndex = state.matches.findIndex(m => m === match);
-                                    return getMatchHtml(type, match, overallMatchIndex, groupTeams);
-                                }).join('')}
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-    } else {
-        // New simplified display for light/hard divisions
-        const courtSections = {};
-        state.matches.forEach(match => {
-            if (!courtSections[match.court]) {
-                courtSections[match.court] = [];
-            }
-            courtSections[match.court].push(match);
-        });
+    const courtSections = {};
+    state.matches.forEach(match => {
+        if (!courtSections[match.court]) {
+            courtSections[match.court] = [];
+        }
+        courtSections[match.court].push(match);
+    });
 
-        container.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                ${[1, 2, 3].map(courtNumber => `
-                    <div class="court-section">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-semibold">Court ${courtNumber}</h3>
-                            <button 
-                                onclick="createNewMatch('${type}', ${courtNumber})"
-                                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+    container.innerHTML = `
+        <div class="flex justify-end mb-4">
+            <button 
+                onclick="addCourt('${type}')"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+                Add New Court
+            </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${Array.from({ length: state.numCourts }, (_, i) => i + 1).map(courtNumber => `
+                <div class="court-section">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value="${state.courtNames[courtNumber] || `Court ${courtNumber}`}"
+                                onchange="updateCourtName('${type}', ${courtNumber}, this.value)"
+                                class="border rounded px-2 py-1 text-sm w-40"
                             >
-                                Add Match
-                            </button>
                         </div>
-                        <div class="space-y-4">
-                            ${(courtSections[courtNumber] || []).map((match) => {
-                                const overallMatchIndex = state.matches.findIndex(m => m === match);
-                                return getSimplifiedMatchHtml(type, match, overallMatchIndex, state.activeTeams);
-                            }).join('')}
-                        </div>
+                        <button 
+                            onclick="createNewMatch('${type}', ${courtNumber})"
+                            class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                        >
+                            Add Match
+                        </button>
                     </div>
-                `).join('')}
-            </div>
-        `;
-    }
+                    <div class="space-y-4">
+                        ${(courtSections[courtNumber] || []).map((match) => {
+                            const overallMatchIndex = state.matches.findIndex(m => m === match);
+                            return getSimplifiedMatchHtml(type, match, overallMatchIndex, state.activeTeams);
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
+
 
 function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) {
     return `
@@ -1132,6 +1120,19 @@ function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) 
             </div>
         </div>
     `;
+}
+
+function updateCourtName(type, courtNumber, newName) {
+    const state = tournamentStates[type];
+    state.courtNames[courtNumber] = newName;
+    saveToLocalStorage();
+}
+
+function addCourt(type) {
+    const state = tournamentStates[type];
+    state.numCourts++;
+    saveToLocalStorage();
+    updateMatchesDisplay(type);
 }
 
 function updateScore(type, matchIndex, score1, score2) {
@@ -1404,7 +1405,9 @@ function loadFromLocalStorage() {
                     groups: Array(type === 'all' ? 6 : 3).fill().map(() => []),
                     matches: [],
                     teamStats: {},
-                    isFirstGeneration: true
+                    isFirstGeneration: true,
+                    numCourts: type === 'all' ? 6 : 3,
+                    courtNames: {}
                 };
             }
 
@@ -1421,7 +1424,9 @@ function loadFromLocalStorage() {
             tournamentStates[type] = {
                 ...loadedData[type],
                 matches: matches,
-                teamStats: loadedData[type].teamStats || {}
+                teamStats: loadedData[type].teamStats || {},
+                numCourts: loadedData[type].numCourts || (type === 'all' ? 6 : 3),
+                courtNames: loadedData[type].courtNames || {}
             };
 
             // Only update displays if the containers exist
@@ -1438,16 +1443,28 @@ function loadFromLocalStorage() {
     }
 }
 
+function updateDisplay(type) {
+    const mainTab = document.getElementById(`${type}-main-tab`);
+    if (!mainTab) return;
+    
+    updateTeamsList(type);
+    updateGroupsDisplay(type);
+    updateMatchesDisplay(type);
+    updateStandings(type);
+}
+
 function saveToLocalStorage() {
     const dataToSave = {};
     Object.entries(tournamentStates).forEach(([type, state]) => {
-    dataToSave[type] = {
-        ...state,
-        matches: state.matches.map(match => ({
-            ...match,
-            startTime: match.startTime.toISOString()
-        }))
-    };
+        dataToSave[type] = {
+            ...state,
+            matches: state.matches.map(match => ({
+                ...match,
+                startTime: match.startTime.toISOString()
+            })),
+            numCourts: state.numCourts || (type === 'all' ? 6 : 3),
+            courtNames: state.courtNames || {}
+        };
     });
 
     localStorage.setItem('moteru-turnyras', JSON.stringify(dataToSave));
