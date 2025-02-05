@@ -112,7 +112,7 @@
                     <div class="tab-content active p-4" data-content="manage">
                         <div class="mb-6">
                             <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-xl font-bold">Beach Volleyball Tournament Groups</h2>
+                                <h2 class="text-xl font-bold">Grupės</h2>
                                 <button 
                                     class="text-blue-500 hover:text-blue-700 px-4 py-2 rounded border border-blue-500 hover:border-blue-700 toggle-team-management"
                                 >
@@ -156,6 +156,29 @@
                                         <button class="clear-button flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
                                             Delete Tournament
                                         </button>
+                                        
+<div class="mt-4 flex space-x-2">
+    <button 
+        onclick="exportTournamentData()" 
+        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+    >
+        Export Tournament Data
+    </button>
+    <div class="relative">
+        <input
+            type="file"
+            id="importFile"
+            accept=".json"
+            onchange="importTournamentData(event)"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+        <button 
+            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+            Import Tournament Data
+        </button>
+    </div>
+</div>
                                     </div>
                                 </div>
                             </div>

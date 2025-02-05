@@ -283,8 +283,8 @@ function splitIntoLightAndHard() {
     distributeTeamsToGroups(tournamentStates.hard);
 
     // Generate new matches for light and hard
-    generateMatches('light');
-    generateMatches('hard');
+   // generateMatches('light');
+   // generateMatches('hard');
 
     // Update displays
     updateGroupsDisplay('light');
@@ -1491,6 +1491,65 @@ function updateMatchComment(type, matchIndex, comment) {
     
     match.comment = comment;
     saveToLocalStorage();
+}
+
+function exportTournamentData() {
+    const data = {
+        tournamentStates,
+        currentTournamentType
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tournament_data.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function importTournamentData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Restore dates for matches
+            Object.keys(data.tournamentStates).forEach(type => {
+                data.tournamentStates[type].matches = data.tournamentStates[type].matches.map(match => ({
+                    ...match,
+                    startTime: new Date(match.startTime)
+                }));
+            });
+
+            // Update global state
+            Object.assign(tournamentStates, data.tournamentStates);
+            currentTournamentType = data.currentTournamentType;
+
+            // Update displays
+            showMainTab(currentTournamentType);
+            ['all', 'light', 'hard'].forEach(type => {
+                updateTeamsList(type);
+                updateGroupsDisplay(type);
+                updateMatchesDisplay(type);
+                updateStandings(type);
+            });
+
+            saveToLocalStorage();
+            alert('Tournament data imported successfully');
+        } catch (error) {
+            console.error('Error importing data:', error);
+            alert('Error importing tournament data');
+        }
+    };
+    reader.readAsText(file);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
