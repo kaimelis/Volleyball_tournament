@@ -4,21 +4,27 @@ const tournamentStates = {
         groups: Array(6).fill().map(() => []),
         matches: [],
         teamStats: {},
-        isFirstGeneration: true
+        isFirstGeneration: true,
+        numCourts: 6,
+        courtNames: {}
     },
     light: {
         activeTeams: [],
         groups: [[]],
         matches: [],
         teamStats: {},
-        isFirstGeneration: true
+        isFirstGeneration: true,
+        numCourts: 3,
+        courtNames: {}
     },
     hard: {
         activeTeams: [],
         groups: [[]],
         matches: [],
         teamStats: {},
-        isFirstGeneration: true
+        isFirstGeneration: true,
+        numCourts: 3,
+        courtNames: {}
     }
 };
 
@@ -131,6 +137,45 @@ const fixedGroups = [
     ]
 ];
 
+const ruleModalHTML = `
+<div id="add-rule-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold mb-4">Add Match Rule</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Team Position</label>
+                <select id="rule-team-position" class="w-full p-2 border rounded">
+                    <option value="team1">Team 1</option>
+                    <option value="team2">Team 2</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Source Match</label>
+                <select id="rule-source-match" class="w-full p-2 border rounded">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Team Selection</label>
+                <select id="rule-type" class="w-full p-2 border rounded">
+                    <option value="winner">Winner</option>
+                    <option value="loser">Loser</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+            <button onclick="closeRuleModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800 rounded">
+                Cancel
+            </button>
+            <button onclick="saveMatchRule()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                Save Rule
+            </button>
+        </div>
+    </div>
+</div>
+`;
+
+document.body.insertAdjacentHTML('beforeend', ruleModalHTML);
 
 let activeTeams = [];
 let groups = Array(6).fill().map(() => []);
@@ -139,6 +184,7 @@ let teamStats = {};
 let isFirstGeneration = true;
 let selectedTeam = null;
 let selectedGroupIndex = null;
+let currentRuleMatch = null;
 
 function initializeTournamentSections() {
     return new Promise(resolve => {
@@ -159,6 +205,134 @@ function initializeTournamentSections() {
 
         resolve();
     });
+}
+
+function showRuleModal(type, matchIndex) {
+    if (!type || !tournamentStates[type]) {
+        console.warn('Invalid tournament type:', type);
+        return;
+    }
+
+    const modal = document.getElementById('add-rule-modal');
+    const sourceMatchSelect = document.getElementById('rule-source-match');
+    
+    // Set current values
+    currentRuleMatch = matchIndex;
+    currentTournamentType = type;
+
+    // Populate source match options
+    const state = tournamentStates[type];
+    sourceMatchSelect.innerHTML = state.matches
+        .map((match, index) => {
+            if (index === matchIndex) return ''; // Don't allow self-reference
+            if (!match.matchNumber) return ''; // Skip matches without numbers
+            return `<option value="${match.matchNumber}">Match ${match.matchNumber}</option>`;
+        })
+        .filter(Boolean)
+        .join('');
+
+    modal.classList.remove('hidden');
+}
+
+function closeRuleModal() {
+    const modal = document.getElementById('add-rule-modal');
+    modal.classList.add('hidden');
+}
+
+function saveMatchRule() {
+    if (!currentRuleMatch || !currentTournamentType) {
+        console.warn('No current match or tournament type selected');
+        return;
+    }
+
+    const state = tournamentStates[currentTournamentType];
+    const match = state.matches[currentRuleMatch];
+    const teamPosition = document.getElementById('rule-team-position').value;
+    const sourceMatch = document.getElementById('rule-source-match').value;
+    const ruleType = document.getElementById('rule-type').value;
+
+    // Initialize rules object if it doesn't exist
+    if (!match.rules) {
+        match.rules = {
+            team1Rule: null,
+            team2Rule: null
+        };
+    }
+
+    const rule = {
+        sourceMatch: parseInt(sourceMatch),
+        type: ruleType
+    };
+
+    if (teamPosition === 'team1') {
+        match.rules.team1Rule = rule;
+    } else {
+        match.rules.team2Rule = rule;
+    }
+
+    // Apply rules immediately
+    applyMatchRules(currentTournamentType);
+    
+    // Close modal and save state
+    closeRuleModal();
+    updateMatchesDisplay(currentTournamentType);
+    saveToLocalStorage();
+}
+
+
+function applyMatchRules(type) {
+    if (!type) {
+        console.warn('Tournament type is required');
+        return;
+    }
+
+    const state = tournamentStates[type];
+    if (!state || !state.matches) {
+        console.warn(`No valid state or matches found for type: ${type}`);
+        return;
+    }
+
+    let rulesApplied = false;
+
+    state.matches.forEach(match => {
+        if (!match.rules) {
+            match.rules = {
+                team1Rule: null,
+                team2Rule: null
+            };
+            return;
+        }
+
+        if (match.rules.team1Rule) {
+            const sourceMatch = state.matches.find(m => m.matchNumber === match.rules.team1Rule.sourceMatch);
+            if (sourceMatch && sourceMatch.team1 && sourceMatch.team2 && 
+                sourceMatch.score1 !== null && sourceMatch.score2 !== null && 
+                sourceMatch.score1 !== sourceMatch.score2) {
+                const winner = sourceMatch.score1 > sourceMatch.score2 ? sourceMatch.team1 : sourceMatch.team2;
+                const loser = sourceMatch.score1 > sourceMatch.score2 ? sourceMatch.team2 : sourceMatch.team1;
+                match.team1 = match.rules.team1Rule.type === 'winner' ? winner : loser;
+                rulesApplied = true;
+            }
+        }
+
+        if (match.rules.team2Rule) {
+            const sourceMatch = state.matches.find(m => m.matchNumber === match.rules.team2Rule.sourceMatch);
+            if (sourceMatch && sourceMatch.team1 && sourceMatch.team2 && 
+                sourceMatch.score1 !== null && sourceMatch.score2 !== null && 
+                sourceMatch.score1 !== sourceMatch.score2) {
+                const winner = sourceMatch.score1 > sourceMatch.score2 ? sourceMatch.team1 : sourceMatch.team2;
+                const loser = sourceMatch.score1 > sourceMatch.score2 ? sourceMatch.team2 : sourceMatch.team1;
+                match.team2 = match.rules.team2Rule.type === 'winner' ? winner : loser;
+                rulesApplied = true;
+            }
+        }
+    });
+
+    if (rulesApplied) {
+        updateMatchesDisplay(type);
+        updateStandings(type);
+        saveToLocalStorage();
+    }
 }
 
 function updateMatchTime(type, matchIndex, newTime) {
@@ -680,6 +854,83 @@ function setMatchUnplayed(type, matchIndex) {
     saveToLocalStorage();
 }
 
+function updateTeamStats(type, team1, team2, score1, score2) {
+    const state = tournamentStates[type];
+    if (!state || !state.teamStats) {
+        console.warn(`Invalid state or teamStats for type: ${type}`);
+        return;
+    }
+
+    // Initialize stats objects if they don't exist
+    [team1, team2].forEach(team => {
+        if (!state.teamStats[team]) {
+            state.teamStats[team] = {
+                wins: 0,
+                pointsScored: 0,
+                pointsConceeded: 0,
+                differential: 0
+            };
+        }
+    });
+
+    // Update team 1 stats
+    state.teamStats[team1].pointsScored += score1;
+    state.teamStats[team1].pointsConceeded += score2;
+    if (score1 > score2) {
+        state.teamStats[team1].wins += 1;
+    }
+
+    // Update team 2 stats
+    state.teamStats[team2].pointsScored += score2;
+    state.teamStats[team2].pointsConceeded += score1;
+    if (score2 > score1) {
+        state.teamStats[team2].wins += 1;
+    }
+
+    // Update differentials
+    state.teamStats[team1].differential = 
+        state.teamStats[team1].pointsScored - state.teamStats[team1].pointsConceeded;
+    state.teamStats[team2].differential = 
+        state.teamStats[team2].pointsScored - state.teamStats[team2].pointsConceeded;
+
+    // Ensure wins and points don't go below 0
+    [team1, team2].forEach(team => {
+        state.teamStats[team].wins = Math.max(0, state.teamStats[team].wins);
+        state.teamStats[team].pointsScored = Math.max(0, state.teamStats[team].pointsScored);
+        state.teamStats[team].pointsConceeded = Math.max(0, state.teamStats[team].pointsConceeded);
+    });
+}
+
+// Also need to update the setMatchUnplayed function to properly use this
+function setMatchUnplayed(type, matchIndex) {
+    const state = tournamentStates[type];
+    const match = state.matches[matchIndex];
+    
+    if (!match) return;
+
+    // Store original values to update stats
+    const originalTeam1 = match.team1;
+    const originalTeam2 = match.team2;
+    const originalScore1 = match.score1;
+    const originalScore2 = match.score2;
+
+    // If there were scores, subtract them from team stats
+    if (originalTeam1 && originalTeam2 && (originalScore1 > 0 || originalScore2 > 0)) {
+        updateTeamStats(type, originalTeam1, originalTeam2, -originalScore1, -originalScore2);
+    }
+
+    // Reset match data
+    match.score1 = 0;
+    match.score2 = 0;
+    match.team1 = '';
+    match.team2 = '';
+
+    // Update displays
+    updateMatchesDisplay(type);
+    updateStandings(type);
+    saveToLocalStorage();
+}
+
 function toggleTournament(type) {
     const state = tournamentStates[type];
 
@@ -1059,10 +1310,49 @@ function updateMatchesDisplay(type) {
 
 
 function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) {
-    // Add matchNumber property if it doesn't exist
-    if (!match.matchNumber) {
-        match.matchNumber = overallMatchIndex + 1;
+    // Ensure rules object exists
+    if (!match.rules) {
+        match.rules = {
+            team1Rule: null,
+            team2Rule: null
+        };
     }
+
+    const ruleInfo = [];
+    if (match.rules.team1Rule) {
+        const ruleType = match.rules.team1Rule.type === 'winner' ? 'Winner' : 'Loser';
+        ruleInfo.push(`
+            <div class="flex justify-between items-center">
+                <span>Team 1: ${ruleType} of Match ${match.rules.team1Rule.sourceMatch}</span>
+                <button 
+                    onclick="removeRule('${type}', ${overallMatchIndex}, 'team1')"
+                    class="text-red-500 hover:text-red-700 text-sm px-2"
+                >
+                    ×
+                </button>
+            </div>
+        `);
+    }
+    if (match.rules.team2Rule) {
+        const ruleType = match.rules.team2Rule.type === 'winner' ? 'Winner' : 'Loser';
+        ruleInfo.push(`
+            <div class="flex justify-between items-center">
+                <span>Team 2: ${ruleType} of Match ${match.rules.team2Rule.sourceMatch}</span>
+                <button 
+                    onclick="removeRule('${type}', ${overallMatchIndex}, 'team2')"
+                    class="text-red-500 hover:text-red-700 text-sm px-2"
+                >
+                    ×
+                </button>
+            </div>
+        `);
+    }
+
+    const ruleDisplay = ruleInfo.length > 0 
+        ? `<div class="text-sm text-gray-600 mt-2 p-2 bg-gray-100 rounded space-y-1">
+             ${ruleInfo.join('')}
+           </div>`
+        : '';
 
     return `
         <div class="bg-gray-50 p-3 rounded-lg relative shadow">
@@ -1089,6 +1379,7 @@ function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) 
                     <select
                         class="flex-grow text-sm font-medium border rounded p-1"
                         onchange="updateMatchTeams('${type}', ${overallMatchIndex}, this.value, '${match.team2}')"
+                        ${match.rules.team1Rule ? 'disabled' : ''}
                     >
                         <option value="" ${!match.team1 ? 'selected' : ''}>Select team</option>
                         ${availableTeams.map(team => `
@@ -1110,6 +1401,7 @@ function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) 
                     <select
                         class="flex-grow text-sm font-medium border rounded p-1"
                         onchange="updateMatchTeams('${type}', ${overallMatchIndex}, '${match.team1}', this.value)"
+                        ${match.rules.team2Rule ? 'disabled' : ''}
                     >
                         <option value="" ${!match.team2 ? 'selected' : ''}>Select team</option>
                         ${availableTeams.map(team => `
@@ -1127,6 +1419,7 @@ function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) 
                         placeholder="Score"
                     >
                 </div>
+                ${ruleDisplay}
                 <input
                     type="text"
                     value="${match.comment || ''}"
@@ -1135,6 +1428,12 @@ function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) 
                     placeholder="Add a comment (optional)"
                 >
                 <div class="flex justify-end space-x-2 mt-2">
+                    <button
+                        onclick="showRuleModal('${type}', ${overallMatchIndex})"
+                        class="text-sm bg-blue-500 text-white hover:bg-blue-600 px-2 py-1 rounded"
+                    >
+                        Add Rule
+                    </button>
                     <button
                         onclick="setMatchUnplayed('${type}', ${overallMatchIndex})"
                         class="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
@@ -1152,6 +1451,7 @@ function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) 
         </div>
     `;
 }
+
 
 function updateMatchNumber(type, matchIndex, newNumber) {
     const state = tournamentStates[type];
@@ -1210,6 +1510,7 @@ function updateScore(type, matchIndex, score1, score2) {
     updateMatchesDisplay(type);
     updateStandings(type);
     saveToLocalStorage();
+    applyMatchRules(type);
 }
 
 function updateStandings(type) {
@@ -1459,7 +1760,11 @@ function loadFromLocalStorage() {
                 score2: match.score2 || 0,
                 startTime: new Date(match.startTime),
                 comment: match.comment || '',
-                matchNumber: match.matchNumber || (index + 1) 
+                matchNumber: match.matchNumber || (index + 1) ,
+                rules: {
+                    team1Rule: match.rules?.team1Rule || null,
+                    team2Rule: match.rules?.team2Rule || null
+                }
             }));
 
             tournamentStates[type] = {
@@ -1484,6 +1789,22 @@ function loadFromLocalStorage() {
     }
 }
 
+function removeRule(type, matchIndex, teamPosition) {
+    const state = tournamentStates[type];
+    const match = state.matches[matchIndex];
+    
+    if (!match || !match.rules) return;
+    
+    if (teamPosition === 'team1') {
+        match.rules.team1Rule = null;
+    } else if (teamPosition === 'team2') {
+        match.rules.team2Rule = null;
+    }
+    
+    updateMatchesDisplay(type);
+    saveToLocalStorage();
+}
+
 function updateDisplay(type) {
     const mainTab = document.getElementById(`${type}-main-tab`);
     if (!mainTab) return;
@@ -1503,7 +1824,7 @@ function saveToLocalStorage() {
                 ...match,
                 startTime: match.startTime.toISOString(),
                 matchNumber: match.matchNumber,
-                comment: match.comment
+                rules: match.rules || { team1Rule: null, team2Rule: null }  // Ensure rules are saved
             })),
             numCourts: state.numCourts || (type === 'all' ? 6 : 3),
             courtNames: state.courtNames || {}
@@ -1512,7 +1833,6 @@ function saveToLocalStorage() {
 
     localStorage.setItem('moteru-turnyras', JSON.stringify(dataToSave));
 }
-
 function clearTournamentData() {
     ['all', 'light', 'hard'].forEach(type => {
         tournamentStates[type] = {
@@ -1535,14 +1855,10 @@ function clearTournamentData() {
 }
 
 function createNewMatch(type, courtNumber) {
-    // Only allow creating new matches for light/hard divisions
-    if (type === 'all') return;
-    
     const state = tournamentStates[type];
     const startTime = new Date();
     startTime.setHours(9, 0, 0, 0);
 
-    // Find the last match in this court to set proper start time
     const courtMatches = state.matches.filter(m => m.court === courtNumber);
     if (courtMatches.length > 0) {
         const lastMatch = courtMatches[courtMatches.length - 1];
@@ -1558,7 +1874,12 @@ function createNewMatch(type, courtNumber) {
         score1: 0,
         score2: 0,
         startTime: startTime,
-        comment: ""
+        comment: "",
+        matchNumber: state.matches.length + 1,
+        rules: {
+            team1Rule: null, // { sourceMatch: number, type: 'winner'|'loser' }
+            team2Rule: null
+        }
     };
 
     state.matches.push(newMatch);
