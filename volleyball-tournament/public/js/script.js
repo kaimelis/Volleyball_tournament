@@ -614,18 +614,19 @@ function createNewMatch(type, courtNumber) {
     if (courtMatches.length > 0) {
         const lastMatch = courtMatches[courtMatches.length - 1];
         const newTime = new Date(lastMatch.startTime);
-        newTime.setMinutes(newTime.getMinutes() + 20); // 20 minute intervals
+        newTime.setMinutes(newTime.getMinutes() + 20);
         startTime.setTime(newTime.getTime());
     }
 
-    // Create new match
     const newMatch = {
         court: courtNumber,
-        team1: "",  // Empty string for unassigned
-        team2: "",  // Empty string for unassigned
+        team1: "",
+        team2: "",
         score1: 0,
         score2: 0,
-        startTime: startTime
+        startTime: startTime,
+        comment: "",
+        matchNumber: state.matches.length + 1 // Add default match number
     };
 
     state.matches.push(newMatch);
@@ -1058,10 +1059,24 @@ function updateMatchesDisplay(type) {
 
 
 function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) {
+    // Add matchNumber property if it doesn't exist
+    if (!match.matchNumber) {
+        match.matchNumber = overallMatchIndex + 1;
+    }
+
     return `
         <div class="bg-gray-50 p-3 rounded-lg relative shadow">
             <div class="flex justify-between items-center text-sm text-gray-600 mb-2">
-                <span>Match #${overallMatchIndex + 1}</span>
+                <div class="flex items-center gap-2">
+                    <span>Match</span>
+                    <input 
+                        type="number" 
+                        value="${match.matchNumber}"
+                        min="1"
+                        onchange="updateMatchNumber('${type}', ${overallMatchIndex}, this.value)"
+                        class="w-16 border rounded p-1 text-sm"
+                    >
+                </div>
                 <input 
                     type="time" 
                     value="${match.startTime.toTimeString().substring(0, 5)}" 
@@ -1136,6 +1151,14 @@ function getSimplifiedMatchHtml(type, match, overallMatchIndex, availableTeams) 
             </div>
         </div>
     `;
+}
+
+function updateMatchNumber(type, matchIndex, newNumber) {
+    const state = tournamentStates[type];
+    if (!state || !state.matches[matchIndex]) return;
+
+    state.matches[matchIndex].matchNumber = parseInt(newNumber);
+    saveToLocalStorage();
 }
 
 function updateCourtName(type, courtNumber, newName) {
@@ -1434,7 +1457,9 @@ function loadFromLocalStorage() {
                 team2: match.team2 || '', // Convert null to empty string
                 score1: match.score1 || 0,
                 score2: match.score2 || 0,
-                startTime: new Date(match.startTime)
+                startTime: new Date(match.startTime),
+                comment: match.comment || '',
+                matchNumber: match.matchNumber || (index + 1) 
             }));
 
             tournamentStates[type] = {
@@ -1476,7 +1501,9 @@ function saveToLocalStorage() {
             ...state,
             matches: state.matches.map(match => ({
                 ...match,
-                startTime: match.startTime.toISOString()
+                startTime: match.startTime.toISOString(),
+                matchNumber: match.matchNumber,
+                comment: match.comment
             })),
             numCourts: state.numCourts || (type === 'all' ? 6 : 3),
             courtNames: state.courtNames || {}
