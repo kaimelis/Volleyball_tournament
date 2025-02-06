@@ -32,41 +32,41 @@ let currentTournamentType = 'all';
 // Default teams
 const defaultTeams = {
     all: [
-        // Group A
-        "Kotryna & Julija",
-        "Brukštienė & Grigaitytė",
-        "Ivanova & Plaščynskaitė",
-        "Vaiva & Fausta",
-        
-        // Group B
-        "Goda & Julija",
-        "Rimgailė & Laima",
-        "JuliAna",
-        "Ramalė & Julia",
-        
-        // Group C
-        "Gadelkytė & Vaisėtaitė",
-        "Bakšytė & Trečiokaitė",
-        "Musteikienė & Vileikytė",
-        "Savostenok & Šaparauskaitė",
-        
-        // Group D
-        "Ieva & Rūta",
-        "Raupelienė & Žalytė",
-        "Aistė & Karolina",
-        "Milevskaja & Pečkaitė",
-        
-        // Group E
-        "Veda & Agnė",
-        "Linos Mokykla",
-        "Lyskoit & Suchockaitė",
-        "Petrauskė & Drungilienė",
-        
-        // Group F
-        "Teisininkai",
-        "Blokelis",
-        "Giliun & Vaikutytė",
-        "Abukauskaitė & Dzičkovska"
+        // Grupė A
+        "Balkauskas/Butkevičiute",
+        "Jurgelaitytė/Martinkėnas",
+        "Vėžliukai",
+        "Go Team",
+
+        // Grupė B
+        "Mazlov/Savič",
+        "Zubaviciute/Rickus",
+        "NEBIJOK GYVENTI",
+        "Bakevičius/Ruseckaitė",
+
+        // Grupė C
+        "Indrė ir Laurynas Pečkaičiai",
+        "Jonaitytė/Švager",
+        "Kaminskai",
+        "Kontrastas",
+
+        // Grupė D
+        "Valteriai",
+        "Karolina ir Liudvikas",
+        "Family power",
+        "Apšerkšniję",
+
+        // Grupė E
+        "Drakoniukai",
+        "Veda ir Arminas",
+        "Masteika/Bulotaitė",
+        "EVELINAS",
+
+        // Grupė F
+        "Muchina & Kolodynskij",
+        "Jankauskaitė/Jarmalavičius",
+        "Viskas",
+        "Tv Mm"
     ],
     light: [
         "Kotryna & Julija",
@@ -99,41 +99,41 @@ const defaultTeams = {
 };
 
 const fixedGroups = [
-    [ // Group A
-        "Kotryna & Julija",
-        "Brukštienė & Grigaitytė",
-        "Ivanova & Plaščynskaitė",
-        "Vaiva & Fausta"
+    [ // Grupė A
+        "Balkauskas/Butkevičiute",
+        "Jurgelaitytė/Martinkėnas",
+        "Vėžliukai",
+        "Go Team"
     ],
-    [ // Group B
-        "Goda & Julija",
-        "Rimgailė & Laima",
-        "JuliAna",
-        "Ramalė & Julia"
+    [ // Grupė B
+        "Mazlov/Savič",
+        "Zubaviciute/Rickus",
+        "NEBIJOK GYVENTI",
+        "Bakevičius/Ruseckaitė"
     ],
-    [ // Group C
-        "Gadelkytė & Vaisėtaitė",
-        "Bakšytė & Trečiokaitė",
-        "Musteikienė & Vileikytė",
-        "Savostenok & Šaparauskaitė"
+    [ // Grupė C
+        "Indrė ir Laurynas Pečkaičiai",
+        "Jonaitytė/Švager",
+        "Kaminskai",
+        "Kontrastas"
     ],
-    [ // Group D
-        "Ieva & Rūta",
-        "Raupelienė & Žalytė",
-        "Aistė & Karolina",
-        "Milevskaja & Pečkaitė"
+    [ // Grupė D
+        "Valteriai",
+        "Karolina ir Liudvikas",
+        "Family power",
+        "Apšerkšniję"
     ],
-    [ // Group E
-        "Veda & Agnė",
-        "Linos Mokykla",
-        "Lyskoit & Suchockaitė",
-        "Petrauskė & Drungilienė"
+    [ // Grupė E
+        "Drakoniukai",
+        "Veda ir Arminas",
+        "Masteika/Bulotaitė",
+        "EVELINAS"
     ],
-    [ // Group F
-        "Teisininkai",
-        "Blokelis",
-        "Giliun & Vaikutytė",
-        "Abukauskaitė & Dzičkovska"
+    [ // Grupė F
+        "Muchina & Kolodynskij",
+        "Jankauskaitė/Jarmalavičius",
+        "Viskas",
+        "Tv Mm"
     ]
 ];
 
@@ -1728,7 +1728,7 @@ function switchTeamGroup() {
 
 function loadFromLocalStorage() {
     try {
-        const savedData = localStorage.getItem('moteru-turnyras');
+        const savedData = localStorage.getItem('mix-turnyras');
         if (!savedData) return false;
 
         const loadedData = JSON.parse(savedData);
@@ -1752,7 +1752,7 @@ function loadFromLocalStorage() {
             }
 
             // Ensure match data is properly initialized
-            const matches = (loadedData[type].matches || []).map(match => ({
+            const matches = (loadedData[type].matches || []).map((match, index) => ({
                 court: match.court,
                 team1: match.team1 || '', // Convert null to empty string
                 team2: match.team2 || '', // Convert null to empty string
@@ -1760,7 +1760,7 @@ function loadFromLocalStorage() {
                 score2: match.score2 || 0,
                 startTime: new Date(match.startTime),
                 comment: match.comment || '',
-                matchNumber: match.matchNumber || (index + 1) ,
+                matchNumber: match.matchNumber || (index + 1), // Now index is correctly defined
                 rules: {
                     team1Rule: match.rules?.team1Rule || null,
                     team2Rule: match.rules?.team2Rule || null
@@ -1831,7 +1831,7 @@ function saveToLocalStorage() {
         };
     });
 
-    localStorage.setItem('moteru-turnyras', JSON.stringify(dataToSave));
+    localStorage.setItem('mix-turnyras', JSON.stringify(dataToSave));
 }
 function clearTournamentData() {
     ['all', 'light', 'hard'].forEach(type => {

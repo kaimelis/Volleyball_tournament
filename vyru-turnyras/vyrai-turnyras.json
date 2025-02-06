@@ -1,0 +1,796 @@
+{
+  "tournamentStates": {
+    "all": {
+      "activeTeams": [
+        "Niks ir Tits",
+        "HIT-MEN",
+        "Arnas & Povilas",
+        "Andžej Poplavskij",
+        "Balkauskas/Pašvenskas",
+        "Fortus stovykla",
+        "Ne siandien",
+        "Pensininkai",
+        "Novikov & Strazdas",
+        "Karalius & Repečka",
+        "Ričkus & Darius",
+        "Sokolovskis & Čiurlys",
+        "Buckus & Visockas",
+        "Team nr. 23",
+        "Margelis & Muckus",
+        "Adomaitis & Sereika",
+        "Eivydas Fight Crew",
+        "Relax",
+        "Kaimynai",
+        "Iš alaus",
+        "Skrebys & Matiukas",
+        "“OUT” ir Ko",
+        "Kliunkiai",
+        "Arianos berniukai"
+      ],
+      "groups": [
+        [
+          "Niks ir Tits",
+          "HIT-MEN",
+          "Arnas & Povilas",
+          "Andžej Poplavskij"
+        ],
+        [
+          "Balkauskas/Pašvenskas",
+          "Fortus stovykla",
+          "Ne siandien",
+          "Pensininkai"
+        ],
+        [
+          "Novikov & Strazdas",
+          "Karalius & Repečka",
+          "Ričkus & Darius",
+          "Sokolovskis & Čiurlys"
+        ],
+        [
+          "Buckus & Visockas",
+          "Team nr. 23",
+          "Margelis & Muckus",
+          "Adomaitis & Sereika"
+        ],
+        [
+          "Eivydas Fight Crew",
+          "Relax",
+          "Kaimynai",
+          "Iš alaus"
+        ],
+        [
+          "Skrebys & Matiukas",
+          "“OUT” ir Ko",
+          "Kliunkiai",
+          "Arianos berniukai"
+        ]
+      ],
+      "matches": [
+        {
+          "court": 1,
+          "team1": "",
+          "team2": "",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T10:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "comment": "Moterys"
+        },
+        {
+          "court": 1,
+          "team1": "",
+          "team2": "",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "comment": "Moterys"
+        },
+        {
+          "court": 1,
+          "team1": "",
+          "team2": "",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 0,
+          "comment": "Moterys"
+        },
+        {
+          "court": 1,
+          "team1": "HIT-MEN",
+          "team2": "Andžej Poplavskij",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 1
+        },
+        {
+          "court": 1,
+          "team1": "Niks ir Tits",
+          "team2": "Arnas & Povilas",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 2
+        },
+        {
+          "court": 1,
+          "team1": "Arnas & Povilas",
+          "team2": "HIT-MEN",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 3
+        },
+        {
+          "court": 2,
+          "team1": "",
+          "team2": "",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T10:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "comment": "Moterys"
+        },
+        {
+          "court": 2,
+          "team1": "",
+          "team2": "",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "comment": "Moterys"
+        },
+        {
+          "court": 2,
+          "team1": "",
+          "team2": "",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 0,
+          "comment": "Moterys"
+        },
+        {
+          "court": 2,
+          "team1": "Fortus stovykla",
+          "team2": "Pensininkai",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 1
+        },
+        {
+          "court": 2,
+          "team1": "Balkauskas/Pašvenskas",
+          "team2": "Pensininkai",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 2
+        },
+        {
+          "court": 2,
+          "team1": "Fortus stovykla",
+          "team2": "Ne siandien",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 3
+        },
+        {
+          "court": 3,
+          "team1": "Balkauskas/Pašvenskas",
+          "team2": "Ne siandien",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T10:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 1,
+          "comment": "Grupė B"
+        },
+        {
+          "court": 3,
+          "team1": "Niks ir Tits",
+          "team2": "Arnas & Povilas",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 2,
+          "comment": "Grupė A"
+        },
+        {
+          "court": 3,
+          "team1": "Ričkus & Darius",
+          "team2": "Sokolovskis & Čiurlys",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 3
+        },
+        {
+          "court": 3,
+          "team1": "Sokolovskis & Čiurlys",
+          "team2": "Novikov & Strazdas",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 4
+        },
+        {
+          "court": 3,
+          "team1": "Ričkus & Darius",
+          "team2": "Karalius & Repečka",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 5
+        },
+        {
+          "court": 3,
+          "team1": "Novikov & Strazdas",
+          "team2": "Karalius & Repečka",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 6
+        },
+        {
+          "court": 4,
+          "team1": "Margelis & Muckus",
+          "team2": "Adomaitis & Sereika",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T10:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 1
+        },
+        {
+          "court": 4,
+          "team1": "Buckus & Visockas",
+          "team2": "Margelis & Muckus",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 2
+        },
+        {
+          "court": 4,
+          "team1": "Team nr. 23",
+          "team2": "Adomaitis & Sereika",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 3
+        },
+        {
+          "court": 4,
+          "team1": "Buckus & Visockas",
+          "team2": "Adomaitis & Sereika",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 4
+        },
+        {
+          "court": 4,
+          "team1": "Team nr. 23",
+          "team2": "Margelis & Muckus",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 5
+        },
+        {
+          "court": 4,
+          "team1": "Buckus & Visockas",
+          "team2": "Team nr. 23",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 6
+        },
+        {
+          "court": 5,
+          "team1": "Kaimynai",
+          "team2": "Iš alaus",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T10:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 1
+        },
+        {
+          "court": 5,
+          "team1": "Eivydas Fight Crew",
+          "team2": "Kaimynai",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 2
+        },
+        {
+          "court": 5,
+          "team1": "Relax",
+          "team2": "Iš alaus",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 3
+        },
+        {
+          "court": 5,
+          "team1": "Eivydas Fight Crew",
+          "team2": "Iš alaus",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 4
+        },
+        {
+          "court": 5,
+          "team1": "Relax",
+          "team2": "Kaimynai",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 5
+        },
+        {
+          "court": 5,
+          "team1": "Eivydas Fight Crew",
+          "team2": "Relax",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 6
+        },
+        {
+          "court": 6,
+          "team1": "Kliunkiai",
+          "team2": "Arianos berniukai",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T10:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 1
+        },
+        {
+          "court": 6,
+          "team1": "Skrebys & Matiukas",
+          "team2": "Kliunkiai",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 2
+        },
+        {
+          "court": 6,
+          "team1": "“OUT” ir Ko",
+          "team2": "Arianos berniukai",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 3
+        },
+        {
+          "court": 6,
+          "team1": "Skrebys & Matiukas",
+          "team2": "Arianos berniukai",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T11:50:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 4
+        },
+        {
+          "court": 6,
+          "team1": "Kliunkiai",
+          "team2": "“OUT” ir Ko",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:10:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 5
+        },
+        {
+          "court": 6,
+          "team1": "Skrebys & Matiukas",
+          "team2": "“OUT” ir Ko",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:30:00.000Z",
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          },
+          "matchNumber": 6
+        },
+        {
+          "court": 3,
+          "team1": "Novikov & Strazdas",
+          "team2": "Ričkus & Darius",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:50:00.000Z",
+          "comment": "",
+          "matchNumber": 7,
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          }
+        },
+        {
+          "court": 4,
+          "team1": "Arnas & Povilas",
+          "team2": "Andžej Poplavskij",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:50:00.000Z",
+          "comment": "Grupė A",
+          "matchNumber": 7,
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          }
+        },
+        {
+          "court": 5,
+          "team1": "Ne siandien",
+          "team2": "Pensininkai",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:50:00.000Z",
+          "comment": "Grupė B",
+          "matchNumber": 7,
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          }
+        },
+        {
+          "court": 6,
+          "team1": "Karalius & Repečka",
+          "team2": "Sokolovskis & Čiurlys",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:50:00.000Z",
+          "comment": "Grupe C",
+          "matchNumber": 7,
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          }
+        },
+        {
+          "court": 1,
+          "team1": "Niks ir Tits",
+          "team2": "HIT-MEN",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:50:00.000Z",
+          "comment": "",
+          "matchNumber": 4,
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          }
+        },
+        {
+          "court": 2,
+          "team1": "Balkauskas/Pašvenskas",
+          "team2": "Fortus stovykla",
+          "score1": 0,
+          "score2": 0,
+          "startTime": "2025-02-01T12:50:00.000Z",
+          "comment": "",
+          "matchNumber": 4,
+          "rules": {
+            "team1Rule": null,
+            "team2Rule": null
+          }
+        }
+      ],
+      "teamStats": {
+        "Niks ir Tits": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "HIT-MEN": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Arnas & Povilas": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Andžej Poplavskij": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Balkauskas/Pašvenskas": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Fortus stovykla": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Ne siandien": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Pensininkai": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Novikov & Strazdas": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Karalius & Repečka": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Ričkus & Darius": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Sokolovskis & Čiurlys": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Buckus & Visockas": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Team nr. 23": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Margelis & Muckus": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Adomaitis & Sereika": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Eivydas Fight Crew": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Relax": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Kaimynai": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Iš alaus": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Skrebys & Matiukas": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "“OUT” ir Ko": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Kliunkiai": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        },
+        "Arianos berniukai": {
+          "wins": 0,
+          "pointsScored": 0,
+          "pointsConceeded": 0,
+          "differential": 0
+        }
+      },
+      "isFirstGeneration": false,
+      "numCourts": 6,
+      "courtNames": {}
+    },
+    "light": {
+      "activeTeams": [],
+      "groups": [
+        []
+      ],
+      "matches": [],
+      "teamStats": {},
+      "isFirstGeneration": true
+    },
+    "hard": {
+      "activeTeams": [],
+      "groups": [
+        []
+      ],
+      "matches": [],
+      "teamStats": {},
+      "isFirstGeneration": true
+    }
+  },
+  "currentTournamentType": "all"
+}

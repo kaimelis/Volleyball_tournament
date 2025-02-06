@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BeachBros Vyrų Paplūdimio Turnyras</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="/public/css/styles.css">
+        <link rel="stylesheet" href="/public/css/output.css">
+    </head>
+    <body class="bg-gray-50">
+        <div class="container mx-auto p-4 custom-wide-container">
+            <div class="bg-white rounded-lg shadow-sm">
+                <!-- Main Tabs -->
+                <div class="border-b">
+                    <div class="flex gap-4 px-4">
+                        <button id="all-main-button" class="tab-button active-tab" onclick="showMainTab('all')">All</button>
+                        <button id="light-main-button" class="tab-button" onclick="showMainTab('light')">Light</button>
+                        <button id="hard-main-button" class="tab-button" onclick="showMainTab('hard')">Hard</button>
+                    </div>
+                </div>
+    
+                <template id="tournament-section-template-simplified">
+                    <div class="border-b">
+                        <div class="flex gap-4 px-4">
+                            <button class="tab-button active-tab" data-action="manage">Manage</button>
+                            <button class="tab-button" data-action="matches">Matches</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Manage Content -->
+                    <div class="tab-content active p-4" data-content="manage">
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-bold">Tournament Groups</h2>
+                                <button 
+                                    class="text-blue-500 hover:text-blue-700 px-4 py-2 rounded border border-blue-500 hover:border-blue-700 toggle-team-management"
+                                >
+                                    Show Team Management
+                                </button>
+                            </div>
+                
+                            <div class="team-management-section hidden space-y-4">
+                                <div>
+                                    <h3 class="font-semibold mb-2">Actions</h3>
+                                    <div class="flex space-x-2">
+                                        <button class="random-scores-button flex-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                            Generate Random Scores
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div class="groups-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="border rounded-lg p-4">
+                                <h3 class="font-semibold mb-2">Teams</h3>
+                                <ul class="space-y-2 teams-list">
+                                  <!-- Teams will be listed here -->
+                                </ul>
+                              </div>
+                            <!-- Groups will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Manage Content -->
+                    <div class="tab-content active p-4" data-content="manage">
+                        <div class="mb-6">
+
+                            <div class="team-management-section hidden space-y-4">
+                                <!-- existing team management content... -->
+                            </div>
+                        </div>
+
+                        <div class="groups-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Groups will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Matches Content -->
+                    <div class="tab-content p-4" data-content="matches">
+                        <div class="mb-4">
+                            <h2 class="text-xl font-bold">Match Schedule</h2>
+                            <p class="text-gray-600 text-sm mt-1">Add and manage individual matches for each court</p>
+                        </div>
+                        <!-- Matches Container -->
+                        <div class="matches-container">
+                            <!-- Matches will be inserted here dynamically -->
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Template for tournament sections -->
+                <template id="tournament-section-template">
+                    <div class="border-b">
+                        <div class="flex gap-4 px-4">
+                            <button class="tab-button active-tab" data-action="manage">Manage</button>
+                            <button class="tab-button" data-action="matches">Matches</button>
+                            <button class="tab-button" data-action="standings">Standings</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Manage Content -->
+                    <div class="tab-content active p-4" data-content="manage">
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-bold">Grupės</h2>
+                                <button 
+                                    class="text-blue-500 hover:text-blue-700 px-4 py-2 rounded border border-blue-500 hover:border-blue-700 toggle-team-management"
+                                >
+                                    Show Team Management
+                                </button>
+                            </div>
+    
+                            <div class="team-management-section hidden space-y-4">
+                                <div class="team-management p-4 border rounded-lg bg-gray-50">
+                                    <h3 class="font-semibold mb-2">Add New Team</h3>
+                                    <div class="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            class="new-team-input flex-1 px-3 py-2 border rounded"
+                                            placeholder="Enter team name"
+                                        >
+                                        <button 
+                                            class="add-team-btn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                        >
+                                            Add Team
+                                        </button>
+                                    </div>
+                                </div>
+    
+                                <div class="teams-list-container p-4 border rounded-lg">
+                                    <h3 class="font-semibold mb-2">Current Teams</h3>
+                                    <div class="teams-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                        <!-- Teams will be listed here -->
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 class="font-semibold mb-2">Demo</h3>
+                                    <div class="flex space-x-2">
+                                        <button class="generate-button flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                            Generate Groups & Schedule
+                                        </button>
+                                        <button class="random-scores-button flex-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                            Generate Random Scores
+                                        </button>
+                                        <button class="clear-button flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                                            Delete Tournament
+                                        </button>
+                                        
+<div class="mt-4 flex space-x-2">
+    <button 
+        onclick="exportTournamentData()" 
+        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+    >
+        Export Tournament Data
+    </button>
+    <div class="relative">
+        <input
+            type="file"
+            id="importFile"
+            accept=".json"
+            onchange="importTournamentData(event)"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+        <button 
+            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+            Import Tournament Data
+        </button>
+    </div>
+</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="groups-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Groups will be inserted here -->
+                        </div>
+                    </div>
+    
+                    <!-- Matches Content -->
+                    <div class="tab-content p-4" data-content="matches">
+                        <div class="matches-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Matches will be inserted here -->
+                        </div>
+                    </div>
+    
+                    <!-- Standings Content -->
+                    <div class="tab-content p-4" data-content="standings">
+                        <div class="space-y-6">
+                            <button id="split-teams-button" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                                Move Top Teams to Hard & Others to Light
+                            </button>
+                            <div class="bg-white rounded-lg p-4 border">
+                                <h3 class="text-lg font-semibold mb-4">Tournament Standings (Wins)</h3>
+                                <div class="wins-standings space-y-2">
+                                    <!-- Wins standings will be inserted here -->
+                                </div>
+                            </div>
+    
+                            <div class="bg-white rounded-lg p-4 border">
+                                <h3 class="text-lg font-semibold mb-4">Point Differential Rankings</h3>
+                                <div class="differential-standings space-y-2">
+                                    <!-- Point differential standings will be inserted here -->
+                                </div>
+                            </div>
+    
+                            <div class="bg-white rounded-lg p-4 border">
+                                <h3 class="text-lg font-semibold mb-4">Group Rankings</h3>
+                                <div class="group-standings space-y-6">
+                                    <!-- Group standings will be inserted here -->
+                                    <template id="group-template">
+                                        <div class="mb-6">
+                                            <h4 class="font-semibold mb-2">Group {N}</h4>
+                                            <div class="space-y-2">
+                                                <!-- Team rows will be inserted here -->
+                                                <template id="team-row-template">
+                                                    <div class="grid grid-cols-5 gap-4 items-center p-2 bg-gray-50 rounded">
+                                                        <div class="text-sm">{rank}. {team}</div>
+                                                        <div class="text-sm font-semibold text-center">{wins} wins</div>
+                                                        <div class="text-sm text-green-600 text-center">Scored: {scored}</div>
+                                                        <div class="text-sm text-red-600 text-center">Conceded: {conceded}</div>
+                                                        <div class="text-sm font-semibold text-right">Diff: {differential}</div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" data-content="bracket">
+                        <div class="p-4">
+                            <h2 class="text-xl font-bold mb-4">Double Elimination Bracket</h2>
+                            <button class="generate-bracket-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">
+                                Generate Bracket
+                            </button>
+                            <div class="winners-bracket bracket-container"></div>
+                            <div class="losers-bracket bracket-container"></div>
+                        </div>
+                    </div>
+                </template>
+    
+                <!-- Main sections -->
+                <div id="all-main-tab" class="main-tab-content active" data-courts="6"></div>
+                <div id="light-main-tab" class="main-tab-content" data-courts="3"></div>
+                <div id="hard-main-tab" class="main-tab-content" data-courts="3"></div>
+            </div>
+        </div>
+    
+        <!-- Switch Team Modal -->
+        <div id="switch-team-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 class="text-lg font-semibold mb-4">Switch Team Group</h3>
+                <div class="mb-4">
+                    <p class="text-gray-600 mb-2">Select new group for: <span id="selected-team" class="font-semibold"></span></p>
+                    <select id="new-group-select" class="w-full p-2 border rounded">
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button 
+                        onclick="closeSwitchTeamModal()" 
+                        class="px-4 py-2 text-gray-600 hover:text-gray-800 rounded"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onclick="switchTeamGroup()" 
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Switch
+                    </button>
+                </div>
+            </div>
+        </div>
+        <script src="/public/js/script.js"></script>
+    </body>
+</html>

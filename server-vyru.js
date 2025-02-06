@@ -3,15 +3,15 @@ const path = require('path');
 const os = require('os');
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 // Serve static files from the project directory
 app.use(express.static(path.join(__dirname, 'htmlBuild')));
-app.use('/public', express.static(path.join(__dirname, 'volleyball-tournament/public')));
+app.use('/public', express.static(path.join(__dirname, 'vyru-turnyras/public')));
 
 // Main route to serve the HTML file
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'volleyball-tournament', 'moterys_turnyras.html'));
+    res.sendFile(path.join(__dirname, 'vyru-turnyras', 'vyru_turnyras.html'));
 });
 
 // Start the server
